@@ -62,13 +62,13 @@ impl GameScene {
     pub fn is_game_over(&self) -> bool {
         self.game.is_game_over()
     }
+
+    pub fn get_score(&self) -> u64 {
+        self.game.get_score()
+    }
 }
 
 impl Scene for GameScene {
-    fn on_activate(&mut self, canvas: &mut Canvas) {
-
-    }
-
     fn on_input(&mut self, event: InputEvent) {
         match event {
             InputEvent::GPIO { event } => {
@@ -90,6 +90,11 @@ impl Scene for GameScene {
         if let Some(last_draw) = self.last_draw {
             // Advance physics
             self.game.update(last_draw.elapsed().unwrap().as_secs_f64());
+        }else {
+            // First frame
+            canvas.clear();
+            canvas.draw_text(Point2 { x: None, y: Some(self.field_start_i32().y - 50)}, "reTris", 200.0);
+            canvas.update_full();
         }
         self.last_draw = Some(SystemTime::now());
 

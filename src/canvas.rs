@@ -48,7 +48,7 @@ impl<'a> Canvas<'a> {
 
     pub fn update_full(&mut self) {
         self.framebuffer_mut().full_refresh(
-            waveform_mode::WAVEFORM_MODE_INIT,
+            waveform_mode::WAVEFORM_MODE_GC16,
             display_temp::TEMP_USE_REMARKABLE_DRAW,
             dither_mode::EPDC_FLAG_USE_REMARKABLE_DITHER,
             0,
@@ -75,5 +75,50 @@ impl<'a> Canvas<'a> {
             DRAWING_QUANT_BIT,
             false
         );*/
+    }
+
+    pub fn draw_text(&mut self, pos: Point2<Option<i32>>, text: &str, size: f32) -> mxcfb_rect {
+        let mut pos = pos;
+        if pos.x.is_none() || pos.y.is_none() {
+            // Do dryrun to get text size
+            let rect = self.framebuffer_mut().draw_text(Point2 { x: 0.0, y: DISPLAYHEIGHT as f32 }, text.to_owned(), size, color::BLACK, true);
+        
+            if pos.x.is_none() {
+                // Center vertically
+                pos.x = Some(DISPLAYWIDTH as i32 / 2 - rect.width as i32 / 2);
+            }
+            
+            if pos.y.is_none() {
+                // Center horizontally
+                pos.y = Some(DISPLAYHEIGHT as i32 / 2 - rect.height as i32 / 2);
+            }
+        }
+        let pos = Point2 { x: pos.x.unwrap() as f32, y: pos.y.unwrap() as f32 };
+
+        self.framebuffer_mut().draw_text(pos, text.to_owned(), size, color::BLACK, false)
+    }
+
+    pub fn draw_rect(&mut self, pos: Point2<Option<i32>>, size: Vector2<u32>, border_px: u32,) -> mxcfb_rect {
+        let mut pos = pos; 
+        if pos.x.is_none() || pos.y.is_none() {
+            if pos.x.is_none() {
+                // Center vertically
+                pos.x = Some(DISPLAYWIDTH as i32 / 2 - size.x as i32 / 2);
+            }
+            
+            if pos.y.is_none() {
+                // Center horizontally
+                pos.y = Some(DISPLAYHEIGHT as i32 / 2 - size.y as i32 / 2);
+            }
+        }
+        let pos = Point2 { x: pos.x.unwrap(), y: pos.y.unwrap() };
+
+        self.framebuffer_mut().draw_rect(pos, size, border_px, color::BLACK);
+        mxcfb_rect {
+            top: pos.y as u32,
+            left: pos.x as u32,
+            width: size.x,
+            height: size.y
+        }
     }
 }

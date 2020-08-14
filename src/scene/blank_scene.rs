@@ -12,10 +12,6 @@ impl BlankScene {
 }
 
 impl Scene for BlankScene {
-    fn on_activate(&mut self, canvas: &mut Canvas) {
-        self.blanked_out = false;
-    }
-
     fn draw(&mut self, canvas: &mut Canvas) {
         if ! self.blanked_out {
             canvas.clear();

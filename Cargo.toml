@@ -10,3 +10,4 @@ edition = "2018"
 rand = "0.7.3"
 libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", rev = "254d008" }
 tetris_core = "0.2.0"
+downcast-rs = "1.2.0"
