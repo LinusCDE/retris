@@ -28,7 +28,7 @@ use std::collections::HashSet;
 pub struct Canvas<'a> {
     game_size: Size,
     block_size: usize,
-    fb: Box::<Framebuffer<'a>>,
+    framebuffer: Box::<Framebuffer<'a>>,
     last_block_positions: HashSet<Point2<i32>>,
 }
 
@@ -37,7 +37,7 @@ impl<'a> Canvas<'a> {
         let mut instance = Self {
             game_size,
             block_size: 50,
-            fb: Box::new(Framebuffer::new("/dev/fb0")),
+            framebuffer: Box::new(Framebuffer::new("/dev/fb0")),
             last_block_positions: HashSet::new(),
         };
         instance.clear();
@@ -45,12 +45,20 @@ impl<'a> Canvas<'a> {
         instance
     }
 
-    fn clear(&mut self) {
-        self.fb.deref_mut().clear();
+    pub fn framebuffer_mut(&mut self) -> &'static mut Framebuffer<'static> {
+        unsafe {
+            std::mem::transmute::<_, &'static mut Framebuffer<'static>>(
+                self.framebuffer.deref_mut(),
+            )
+        }
     }
 
-    fn update_full(&mut self) {
-        self.fb.deref_mut().full_refresh(
+    fn clear(&mut self) {
+        self.framebuffer_mut().clear();
+    }
+
+    pub fn update_full(&mut self) {
+        self.framebuffer_mut().full_refresh(
             waveform_mode::WAVEFORM_MODE_INIT,
             display_temp::TEMP_USE_REMARKABLE_DRAW,
             dither_mode::EPDC_FLAG_USE_REMARKABLE_DITHER,
@@ -59,8 +67,8 @@ impl<'a> Canvas<'a> {
         );
     }
     
-    fn update_partial(&mut self, region: &mxcfb_rect) {
-        self.fb.deref_mut().partial_refresh(
+    pub fn update_partial(&mut self, region: &mxcfb_rect) {
+        self.framebuffer_mut().partial_refresh(
             region,
             PartialRefreshMode::Async,
             waveform_mode::WAVEFORM_MODE_GLR16,
@@ -96,13 +104,13 @@ impl<'a> Canvas<'a> {
         {
             let point = self.field_start_i32();
             let vec = self.field_size();
-            self.fb.deref_mut().draw_rect(point, vec, 1, color::BLACK);
+            self.framebuffer_mut().draw_rect(point, vec, 1, color::BLACK);
         }
 
         for block in game.draw() {
             let block_start = self.to_coords((block.rect.origin.x as usize, block.rect.origin.y as usize));
             let block_size = self.to_size((block.rect.size.width as usize, block.rect.size.height as usize));
-            self.fb.deref_mut().fill_rect(
+            self.framebuffer_mut().fill_rect(
                 Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
                 Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
                 color::BLACK
@@ -112,7 +120,7 @@ impl<'a> Canvas<'a> {
         let field_start = self.field_start_u32();
         let field_size = self.field_size();
         const FONT_SIZE: u32 = 40;
-        self.fb.deref_mut().draw_text(
+        self.framebuffer_mut().draw_text(
             Point2 { x: (field_start.x + 10) as f32, y: (field_start.y + field_size.y + FONT_SIZE + 5) as f32 },
             format!("Score: {}", game.get_score()),
             FONT_SIZE as f32,
