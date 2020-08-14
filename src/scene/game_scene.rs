@@ -4,6 +4,9 @@ use {rand, rand::Rng};
 use libremarkable::input::{gpio, wacom, multitouch, ev, InputDevice, InputEvent};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
 use std::time::{SystemTime, Duration};
+use std::collections::HashSet;
+use libremarkable::framebuffer::common;
+use libremarkable::framebuffer::refresh::PartialRefreshMode;
 
 struct RandomizerImpl;
 impl Randomizer for RandomizerImpl {
@@ -17,6 +20,8 @@ pub struct GameScene {
     last_draw: Option<SystemTime>,
     game_size: Size,
     block_size: usize,
+    last_blocks: HashSet<Point2<u8>>,
+    last_score: u64,
 }
 
 impl GameScene {
@@ -26,6 +31,8 @@ impl GameScene {
             last_draw: None,
             game_size,
             block_size: 50,
+            last_blocks: HashSet::new(),
+            last_score: 0,
         }
     }
 
@@ -66,6 +73,112 @@ impl GameScene {
     pub fn get_score(&self) -> u64 {
         self.game.get_score()
     }
+
+    fn draw_blocks(&mut self, canvas: &mut Canvas) {
+        let mut blocks: HashSet<Point2<u8>> = HashSet::new();
+        for block in self.game.draw() {
+            blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 });
+        }
+
+        let mut to_white: Vec<mxcfb_rect> = Vec::new();
+        let mut to_black: Vec<mxcfb_rect> = Vec::new();
+
+        for y in 0..self.game_size().height {
+            for x in 0..self.game_size().width {
+                let pos = Point2 { x: x as u8, y: y as u8 };
+                let was_filled = self.last_blocks.contains(&pos);
+                let is_filled = blocks.contains(&pos);
+
+                if was_filled != is_filled {
+
+                    // Change detected
+                    let block_start = self.to_coords((x, y));
+                    let block_size = self.to_size((1,1));
+
+                    // Block went away
+                    canvas.framebuffer_mut().fill_rect(
+                        Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
+                        Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
+                        if is_filled { color::BLACK } else { color::WHITE }
+                    );
+                    let rect = mxcfb_rect::from(
+                        Point2 { x: block_start.0 as u32, y: block_start.1 as u32 },
+                        Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 }
+                    );
+
+                    if is_filled {
+                        to_black.push(rect);
+                    }else {
+                        to_white.push(rect);
+                    }
+ 
+                    /*canvas.framebuffer_mut().partial_refresh(
+                        &rect,
+                        PartialRefreshMode::Async,
+                        common::waveform_mode::WAVEFORM_MODE_GLR16,
+                        common::display_temp::TEMP_USE_REMARKABLE_DRAW,
+                        common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
+                        common::DRAWING_QUANT_BIT,
+                        false
+                    );*/
+                }
+            }
+        }
+
+        for rect in to_white {
+            canvas.framebuffer_mut().partial_refresh(
+                &rect,
+                PartialRefreshMode::Async,
+                common::waveform_mode::WAVEFORM_MODE_GLR16,
+                common::display_temp::TEMP_USE_REMARKABLE_DRAW,
+                common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
+                common::DRAWING_QUANT_BIT,
+                false
+            );
+        }
+
+        for rect in to_black {
+            canvas.framebuffer_mut().partial_refresh(
+                &rect,
+                PartialRefreshMode::Async,
+                common::waveform_mode::WAVEFORM_MODE_GLR16,
+                common::display_temp::TEMP_USE_REMARKABLE_DRAW,
+                common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
+                common::DRAWING_QUANT_BIT,
+                false
+            );
+        }
+
+        self.last_blocks = blocks;
+    }
+
+    fn draw_score(&mut self, canvas: &mut Canvas) {
+        let field_start = self.field_start_u32();
+        let field_size = self.field_size();
+
+        // Transition to white first because of fragments!
+        let pos = Point2 {
+            x: field_start.x as i32,
+            y: (field_start.y + field_size.y + 3) as i32
+        };
+        let size = Vector2 {
+            x: field_size.x,
+            y: FONT_SIZE + 30
+        };
+        canvas.framebuffer_mut().fill_rect(pos, size, color::WHITE);
+        canvas.update_partial(&mxcfb_rect::from(Point2 { x: pos.x as u32, y: pos.y as u32 }, size));
+
+        const FONT_SIZE: u32 = 40;
+        let affected_rect = canvas.draw_text(
+            Point2 {
+                x: Some((field_start.x + 10) as i32),
+                y: Some((field_start.y + field_size.y + FONT_SIZE + 5) as i32)
+            },
+            &format!("Score: {}", self.get_score()),
+            FONT_SIZE as f32,
+        );
+        canvas.update_partial(&affected_rect);
+    }
 }
 
 impl Scene for GameScene {
@@ -94,41 +207,21 @@ impl Scene for GameScene {
             // First frame
             canvas.clear();
             canvas.draw_text(Point2 { x: None, y: Some(self.field_start_i32().y - 50)}, "reTris", 200.0);
+
+            let point = Point2 { x: self.field_start_i32().x - 2, y: self.field_start_i32().y - 2 };
+            let vec = Vector2 { x: 2 + self.field_size().x + 2, y: 2 + self.field_size().y + 2 };
+            canvas.framebuffer_mut().draw_rect(point, vec, 1, color::BLACK);
             canvas.update_full();
+            self.draw_score(canvas);
         }
         self.last_draw = Some(SystemTime::now());
 
-
-        canvas.clear();
-        {
-            let point = self.field_start_i32();
-            let vec = self.field_size();
-            canvas.framebuffer_mut().draw_rect(point, vec, 1, color::BLACK);
+        // Update score if changed
+        if self.last_score != self.get_score() {
+            self.last_score = self.get_score();
+            self.draw_score(canvas);
         }
-
-        for block in self.game.draw() {
-            let block_start = self.to_coords((block.rect.origin.x as usize, block.rect.origin.y as usize));
-            let block_size = self.to_size((block.rect.size.width as usize, block.rect.size.height as usize));
-            canvas.framebuffer_mut().fill_rect(
-                Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
-                Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
-                color::BLACK
-            );
-        }
-
-        let field_start = self.field_start_u32();
-        let field_size = self.field_size();
-        const FONT_SIZE: u32 = 40;
-        canvas.framebuffer_mut().draw_text(
-            Point2 { x: (field_start.x + 10) as f32, y: (field_start.y + field_size.y + FONT_SIZE + 5) as f32 },
-            format!("Score: {}", self.game.get_score()),
-            FONT_SIZE as f32,
-            color::BLACK,
-            false
-        );
-
-        let point = Point2 { x: self.field_start_u32().x - 5, y: self.field_start_u32().y - 5 };
-        let vec = self.field_size() + Vector2 { x: 5 + 5, y: 5 + FONT_SIZE + 5 };
-        canvas.update_partial(&mxcfb_rect::from(point, vec));
+        
+        self.draw_blocks(canvas);    
     }
 }
