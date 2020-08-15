@@ -21,7 +21,7 @@ fn main() {
     EvDevContext::new(InputDevice::GPIO, input_tx.clone()).start();
     EvDevContext::new(InputDevice::Multitouch, input_tx.clone()).start();
     //EvDevContext::new(InputDevice::Wacom, input_tx.clone()).start();
-    const FPS: u16 = 20;
+    const FPS: u16 = 30;
     const FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS as u64);
 
     let mut current_scene: Box<dyn Scene> = Box::new(MainMenuScene::new(None));

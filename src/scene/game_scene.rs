@@ -74,14 +74,13 @@ impl GameScene {
         self.game.get_score()
     }
 
-    fn draw_blocks(&mut self, canvas: &mut Canvas) {
+    fn draw_blocks(&mut self, canvas: &mut Canvas) -> bool {
         let mut blocks: HashSet<Point2<u8>> = HashSet::new();
         for block in self.game.draw() {
             blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 });
         }
 
-        let mut to_white: Vec<mxcfb_rect> = Vec::new();
-        let mut to_black: Vec<mxcfb_rect> = Vec::new();
+        let mut any_change = false;
 
         for y in 0..self.game_size().height {
             for x in 0..self.game_size().width {
@@ -90,6 +89,7 @@ impl GameScene {
                 let is_filled = blocks.contains(&pos);
 
                 if was_filled != is_filled {
+                    any_change = true;
 
                     // Change detected
                     let block_start = self.to_coords((x, y));
@@ -101,55 +101,13 @@ impl GameScene {
                         Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
                         if is_filled { color::BLACK } else { color::WHITE }
                     );
-                    let rect = mxcfb_rect::from(
-                        Point2 { x: block_start.0 as u32, y: block_start.1 as u32 },
-                        Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 }
-                    );
-
-                    if is_filled {
-                        to_black.push(rect);
-                    }else {
-                        to_white.push(rect);
-                    }
- 
-                    /*canvas.framebuffer_mut().partial_refresh(
-                        &rect,
-                        PartialRefreshMode::Async,
-                        common::waveform_mode::WAVEFORM_MODE_GLR16,
-                        common::display_temp::TEMP_USE_REMARKABLE_DRAW,
-                        common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
-                        common::DRAWING_QUANT_BIT,
-                        false
-                    );*/
                 }
             }
         }
 
-        for rect in to_white {
-            canvas.framebuffer_mut().partial_refresh(
-                &rect,
-                PartialRefreshMode::Async,
-                common::waveform_mode::WAVEFORM_MODE_GLR16,
-                common::display_temp::TEMP_USE_REMARKABLE_DRAW,
-                common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
-                common::DRAWING_QUANT_BIT,
-                false
-            );
-        }
-
-        for rect in to_black {
-            canvas.framebuffer_mut().partial_refresh(
-                &rect,
-                PartialRefreshMode::Async,
-                common::waveform_mode::WAVEFORM_MODE_GLR16,
-                common::display_temp::TEMP_USE_REMARKABLE_DRAW,
-                common::dither_mode::EPDC_FLAG_USE_DITHERING_DRAWING,
-                common::DRAWING_QUANT_BIT,
-                false
-            );
-        }
-
         self.last_blocks = blocks;
+
+        any_change
     }
 
     fn draw_score(&mut self, canvas: &mut Canvas) {
@@ -177,7 +135,6 @@ impl GameScene {
             &format!("Score: {}", self.get_score()),
             FONT_SIZE as f32,
         );
-        canvas.update_partial(&affected_rect);
     }
 }
 
@@ -216,12 +173,19 @@ impl Scene for GameScene {
         }
         self.last_draw = Some(SystemTime::now());
 
+        let mut any_change = false;
         // Update score if changed
         if self.last_score != self.get_score() {
             self.last_score = self.get_score();
             self.draw_score(canvas);
+            any_change = true;
         }
         
-        self.draw_blocks(canvas);    
+        any_change |= self.draw_blocks(canvas);
+
+        if any_change {
+            // If any change => A2 refresh the display
+            canvas.update_partial(&mxcfb_rect { left: 0, top: 0, width: DISPLAYWIDTH as u32, height: DISPLAYHEIGHT as u32 });
+        }
     }
 }
