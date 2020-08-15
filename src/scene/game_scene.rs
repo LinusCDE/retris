@@ -4,9 +4,10 @@ use {rand, rand::Rng};
 use libremarkable::input::{gpio, wacom, multitouch, ev, InputDevice, InputEvent};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
 use std::time::{SystemTime, Duration};
-use std::collections::HashSet;
+use std::collections::HashMap;
 use libremarkable::framebuffer::common;
 use libremarkable::framebuffer::refresh::PartialRefreshMode;
+use libremarkable::image::RgbImage;
 
 struct RandomizerImpl;
 impl Randomizer for RandomizerImpl {
@@ -15,24 +16,75 @@ impl Randomizer for RandomizerImpl {
     }
 }
 
+#[derive(Hash, Eq, PartialEq)]
+struct StupidColor(u8, u8, u8);
+
+impl StupidColor {
+    pub fn from(r: f32, g: f32, b: f32) -> Self {
+        StupidColor(
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8
+        )
+    }
+}
+
 pub struct GameScene {
     game: Game,
     last_draw: Option<SystemTime>,
     game_size: Size,
     block_size: usize,
-    last_blocks: HashSet<Point2<u8>>,
+    last_blocks: HashMap<Point2<u8>, Block>,
     last_score: u64,
+    textures: HashMap<StupidColor, RgbImage>,
 }
+
 
 impl GameScene {
     pub fn new(game_size: Size) -> Self {
+        // Generate textures
+        let block_size = 50;
+        let mut textures: HashMap<StupidColor, RgbImage> = HashMap::new();
+        let black = libremarkable::image::Rgb([0, 0, 0]);
+        let white = libremarkable::image::Rgb([255, 255, 255]);
+        let i: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if x * y % 5 == 0 { black } else { white }
+        });
+        let j: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if x % 5 == 0 { black } else { if y % 2 == 0 { black } else { white } }
+        });
+        let l: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if y % 5 == 0 { black } else { white }
+        });
+        let o: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if y * x % 10 > 3 { black } else { white }
+        });
+        let z: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if y % 5 == 0 { black } else { white }
+        });
+        let t: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if y * x * 3 % 10 == 0 { black } else { white }
+        });
+        let s: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+            if x * y % 5 != 0 { black } else { white }
+        });
+        textures.insert(StupidColor::from(108.0 / 255.0, 237.0 / 255.0, 238.0 / 255.0), i); // I-Block
+        textures.insert(StupidColor::from(0.0, 33.0 / 255.0, 230.0 / 255.0), j); // J-Block
+        textures.insert(StupidColor::from(229.0 / 255.0, 162.0 / 255.0, 67.0 / 255.0), l); // L-Block
+        textures.insert(StupidColor::from(241.0 / 255.0, 238.0 / 255.0, 79.0 / 255.0), o); // O-Block
+        textures.insert(StupidColor::from(110.0 / 255.0, 235.0 / 255.0, 71.0 / 255.0), z); // Z-Block
+        textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), t); // T-Block
+        textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), s); // S-Block
+
+
         Self {
             game: Game::new(&Size { width: 10, height: 22 }, Box::new(RandomizerImpl)),
             last_draw: None,
             game_size,
-            block_size: 50,
-            last_blocks: HashSet::new(),
+            block_size: block_size as usize,
+            last_blocks: HashMap::new(),
             last_score: 0,
+            textures,
         }
     }
 
@@ -75,9 +127,9 @@ impl GameScene {
     }
 
     fn draw_blocks(&mut self, canvas: &mut Canvas) -> bool {
-        let mut blocks: HashSet<Point2<u8>> = HashSet::new();
+        let mut blocks: HashMap<Point2<u8>, Block> = HashMap::new();
         for block in self.game.draw() {
-            blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 });
+            blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 }, block);
         }
 
         let mut any_change = false;
@@ -85,8 +137,8 @@ impl GameScene {
         for y in 0..self.game_size().height {
             for x in 0..self.game_size().width {
                 let pos = Point2 { x: x as u8, y: y as u8 };
-                let was_filled = self.last_blocks.contains(&pos);
-                let is_filled = blocks.contains(&pos);
+                let was_filled = self.last_blocks.contains_key(&pos);
+                let is_filled = blocks.contains_key(&pos);
 
                 if was_filled != is_filled {
                     any_change = true;
@@ -96,11 +148,25 @@ impl GameScene {
                     let block_size = self.to_size((1,1));
 
                     // Block went away
-                    canvas.framebuffer_mut().fill_rect(
-                        Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
-                        Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
-                        if is_filled { color::BLACK } else { color::WHITE }
-                    );
+                    if is_filled {
+                        let block = blocks.get(&pos).unwrap();
+                        let color = StupidColor::from(block.color.red, block.color.green, block.color.blue);
+                        if let Some(ref image) = self.textures.get(&color) {
+                            canvas.framebuffer_mut().draw_image(image, Point2 { x: block_start.0 as i32, y: block_start.1 as i32 });
+                        } else {
+                            canvas.framebuffer_mut().fill_rect(
+                                Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
+                                Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
+                                color::BLACK
+                            );
+                        }
+                    }else {
+                        canvas.framebuffer_mut().fill_rect(
+                            Point2 { x: block_start.0 as i32, y: block_start.1 as i32 },
+                            Vector2 { x: block_size.0 as u32, y: block_size.1 as u32 },
+                            color::WHITE
+                        );
+                    }
                 }
             }
         }
