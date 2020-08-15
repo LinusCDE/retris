@@ -11,7 +11,7 @@ use libremarkable::framebuffer::refresh::PartialRefreshMode;
 struct RandomizerImpl;
 impl Randomizer for RandomizerImpl {
     fn random_between(&self, first: i32, last: i32) -> i32 {
-        rand::thread_rng().gen_range(first, last)
+        rand::thread_rng().gen_range(first, last+1)
     }
 }
 
