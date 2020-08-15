@@ -84,12 +84,12 @@ impl<'a> Canvas<'a> {
             let rect = self.framebuffer_mut().draw_text(Point2 { x: 0.0, y: DISPLAYHEIGHT as f32 }, text.to_owned(), size, color::BLACK, true);
         
             if pos.x.is_none() {
-                // Center vertically
+                // Center horizontally
                 pos.x = Some(DISPLAYWIDTH as i32 / 2 - rect.width as i32 / 2);
             }
             
             if pos.y.is_none() {
-                // Center horizontally
+                // Center vertically
                 pos.y = Some(DISPLAYHEIGHT as i32 / 2 - rect.height as i32 / 2);
             }
         }
@@ -102,12 +102,12 @@ impl<'a> Canvas<'a> {
         let mut pos = pos; 
         if pos.x.is_none() || pos.y.is_none() {
             if pos.x.is_none() {
-                // Center vertically
+                // Center horizontally
                 pos.x = Some(DISPLAYWIDTH as i32 / 2 - size.x as i32 / 2);
             }
             
             if pos.y.is_none() {
-                // Center horizontally
+                // Center vertically
                 pos.y = Some(DISPLAYHEIGHT as i32 / 2 - size.y as i32 / 2);
             }
         }
