@@ -8,11 +8,49 @@ use std::collections::HashMap;
 use libremarkable::framebuffer::common;
 use libremarkable::framebuffer::refresh::PartialRefreshMode;
 use libremarkable::image::RgbImage;
+use std::cell::RefCell;
 
-struct RandomizerImpl;
-impl Randomizer for RandomizerImpl {
-    fn random_between(&self, first: i32, last: i32) -> i32 {
+struct OpionatedRandomizer {
+    // Since the trait gives only immutable self,
+    // we cant expect to modifiy any states easily.
+    // This example is basicially a non thread-safe
+    // Mutex that enforces rusts borrow-rules
+    // dynamically at runtime.
+    block_pool: RefCell<Vec<i32>>
+}
+impl OpionatedRandomizer {
+    pub fn new() -> Self {
+        Self { block_pool: RefCell::new(vec![]) }
+    }
+    fn actual_random_between(&self, first: i32, last: i32) -> i32 {
         rand::thread_rng().gen_range(first, last+1)
+    }
+    fn fillup(&self, sets: usize) {
+        let mut block_pool = self.block_pool.borrow_mut();
+        for _ in 0..sets {
+            for random_number in 0..7 {
+                block_pool.push(random_number);
+            }
+        }
+    }
+}
+impl Randomizer for OpionatedRandomizer {
+    fn random_between(&self, first: i32, last: i32) -> i32 {
+        if first == 0 && last == 6 {
+            // Basicially the only thing tetris_core will ever want
+
+            // Fillup the pool again
+            if self.block_pool.borrow().len() == 0 {
+                self.fillup(2);
+            }
+
+            // Take and return random element from pool
+            let len = self.block_pool.borrow().len();
+            self.block_pool.borrow_mut().remove(self.actual_random_between(0, len as i32 - 1) as usize)
+        }else {
+            // Fallback
+            self.actual_random_between(first, last)
+        }
     }
 }
 
@@ -78,7 +116,7 @@ impl GameScene {
 
 
         Self {
-            game: Game::new(&Size { width: 10, height: 22 }, Box::new(RandomizerImpl)),
+            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new())),
             last_draw: None,
             game_size,
             block_size: block_size as usize,
