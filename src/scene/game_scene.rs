@@ -92,34 +92,34 @@ impl GameScene {
         let mut textures: HashMap<StupidColor, RgbImage> = HashMap::new();
         let black = libremarkable::image::Rgb([0, 0, 0]);
         let white = libremarkable::image::Rgb([255, 255, 255]);
-        let i: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
+        let img_i: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y|
             if x * y % 5 == 0 { black } else { white }
-        });
-        let j: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
-            if x % 5 == 0 { black } else { if y % 2 == 0 { black } else { white } }
-        });
-        let l: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y| {
+        );
+        let img_j: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y|
+            if x % 5 == 0 || y % 2 == 0 { black } else { white }
+        );
+        let img_l: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y|
             if y % 5 == 0 { black } else { white }
-        });
-        let o: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
+        );
+        let img_o: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y|
             if y * x % 10 > 3 { black } else { white }
-        });
-        let z: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y| {
+        );
+        let img_z: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y|
             if y % 5 == 0 { black } else { white }
-        });
-        let t: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
+        );
+        let img_t: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y|
             if y * x * 3 % 10 == 0 { black } else { white }
-        });
-        let s: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
+        );
+        let img_s: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y|
             if x * y % 5 != 0 { black } else { white }
-        });
-        textures.insert(StupidColor::from(108.0 / 255.0, 237.0 / 255.0, 238.0 / 255.0), i); // I-Block
-        textures.insert(StupidColor::from(0.0, 33.0 / 255.0, 230.0 / 255.0), j); // J-Block
-        textures.insert(StupidColor::from(229.0 / 255.0, 162.0 / 255.0, 67.0 / 255.0), l); // L-Block
-        textures.insert(StupidColor::from(241.0 / 255.0, 238.0 / 255.0, 79.0 / 255.0), o); // O-Block
-        textures.insert(StupidColor::from(110.0 / 255.0, 235.0 / 255.0, 71.0 / 255.0), z); // Z-Block
-        textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), t); // T-Block
-        textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), s); // S-Block
+        );
+        textures.insert(StupidColor::from(108.0 / 255.0, 237.0 / 255.0, 238.0 / 255.0), img_i); // I-Block
+        textures.insert(StupidColor::from(0.0, 33.0 / 255.0, 230.0 / 255.0), img_j); // J-Block
+        textures.insert(StupidColor::from(229.0 / 255.0, 162.0 / 255.0, 67.0 / 255.0), img_l); // L-Block
+        textures.insert(StupidColor::from(241.0 / 255.0, 238.0 / 255.0, 79.0 / 255.0), img_o); // O-Block
+        textures.insert(StupidColor::from(110.0 / 255.0, 235.0 / 255.0, 71.0 / 255.0), img_z); // Z-Block
+        textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), img_t); // T-Block
+        textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), img_s); // S-Block
 
         Self {
             game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new())),

@@ -63,7 +63,7 @@ impl TrackedFinger {
     fn highest_orthogonal_dist(&self) -> u16 {
         let x_dist = (self.current_pos.x as i16 - self.last_pos.x as i16).abs() as u16;
         let y_dist = (self.current_pos.y as i16 - self.last_pos.y as i16).abs() as u16;
-        return std::cmp::max(x_dist, y_dist)
+        std::cmp::max(x_dist, y_dist)
     }
 
     fn update(&mut self, current_pos: Point2<u16>) {
