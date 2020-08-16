@@ -1,11 +1,13 @@
 use super::Scene;
 use crate::canvas::*;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
+use fxhash::FxHashMap;
 use libremarkable::image::RgbImage;
 use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::SystemTime;
+use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
 use {rand, rand::Rng};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
 
@@ -16,10 +18,13 @@ struct OpionatedRandomizer {
     /// Mutex that enforces rusts borrow-rules
     /// dynamically at runtime.
     block_pool: RefCell<Vec<i32>>,
+    /// A count of how often a value from block_pool
+    /// was returned to keep track of differing blocks.
+    block_id: Arc<AtomicU32>,
 }
 impl OpionatedRandomizer {
-    pub fn new() -> Self {
-        Self { block_pool: RefCell::new(vec![]) }
+    pub fn new(block_id: Arc<AtomicU32>) -> Self {
+        Self { block_pool: RefCell::new(vec![]), block_id }
     }
     fn actual_random_between(&self, first: i32, last: i32) -> i32 {
         rand::thread_rng().gen_range(first, last+1)
@@ -45,6 +50,7 @@ impl Randomizer for OpionatedRandomizer {
 
             // Take and return random element from pool
             let len = self.block_pool.borrow().len();
+            self.block_id.fetch_add(1, Ordering::Relaxed); // block_id += 1
             self.block_pool.borrow_mut().remove(self.actual_random_between(0, len as i32 - 1) as usize)
         }else {
             // Fallback
@@ -82,6 +88,8 @@ pub struct GameScene {
     right_button_hitbox: Option<mxcfb_rect>,
     is_paused: bool,
     pub back_button_pressed: bool,
+    block_id: Arc<AtomicU32>,
+    finger_controls_which_block: FxHashMap<i32/* Tracking id */, u32/* Block id */>,
 }
 
 
@@ -121,8 +129,9 @@ impl GameScene {
         textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), img_t); // T-Block
         textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), img_s); // S-Block
 
+        let block_id = Arc::new(AtomicU32::new(0));
         Self {
-            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new())),
+            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new(block_id.clone()))),
             last_draw: None,
             game_size,
             block_size: block_size as usize,
@@ -137,6 +146,8 @@ impl GameScene {
             right_button_hitbox: None,
             is_paused: false,
             back_button_pressed: false,
+            block_id,
+            finger_controls_which_block: FxHashMap::default(),
         }
     }
 
@@ -276,6 +287,8 @@ impl Scene for GameScene {
                 match event {
                     multitouch::MultitouchEvent::Press { finger } => {
                         self.last_pressed_finger = Some((finger, SystemTime::now()));
+                        // This finger can only control the current block with swipes
+                        self.finger_controls_which_block.insert(finger.tracking_id, self.block_id.load(Ordering::Relaxed));
                     },
                     multitouch::MultitouchEvent::Release { finger: up_finger } => {
                         if let Some((down_finger, down_when)) = self.last_pressed_finger {
@@ -317,18 +330,25 @@ impl Scene for GameScene {
                     Swipe { direction: Direction::Right, trigger: Trigger::MinDistance(50) },
                 ];
 
+                let tracking_id = &event.finger().unwrap().tracking_id;
                 if let Some(swipe) = self.swipe_tracker.detect(event, &SWIPES) {
-                    match swipe.direction {
-                        Direction::Left => self.game.perform(Action::MoveLeft),
-                        Direction::Right => self.game.perform(Action::MoveRight),
-                        Direction::Down => {
-                            // Push all the way down
-                            for _ in 0..self.game_size.height {
-                                self.game.perform(Action::MoveDown);
+                    if self.finger_controls_which_block.get(&tracking_id) == Some(&self.block_id.load(Ordering::Relaxed)) { // Is current?
+                        match swipe.direction {
+                            Direction::Left => self.game.perform(Action::MoveLeft),
+                            Direction::Right => self.game.perform(Action::MoveRight),
+                            Direction::Down => {
+                                // Push all the way down
+                                for _ in 0..self.game_size.height {
+                                    self.game.perform(Action::MoveDown);
+                                }
                             }
+                            Direction::Up => self.game.perform(Action::Rotate),
                         }
-                        Direction::Up => self.game.perform(Action::Rotate),
                     }
+                }
+
+                if let multitouch::MultitouchEvent::Release { .. } = event {
+                    self.finger_controls_which_block.remove(&tracking_id);
                 }
             }
             _ => { }
