@@ -1,10 +1,12 @@
 use crate::canvas::*;
 use super::Scene;
 use {rand, rand::Rng};
-use libremarkable::input::{gpio, multitouch, InputEvent};
+use libremarkable::input::{gpio, wacom, multitouch, ev, InputDevice, InputEvent};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
-use std::time::SystemTime;
+use std::time::{SystemTime, Duration};
 use std::collections::HashMap;
+use libremarkable::framebuffer::common;
+use libremarkable::framebuffer::refresh::PartialRefreshMode;
 use libremarkable::image::RgbImage;
 use std::cell::RefCell;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
@@ -294,7 +296,7 @@ impl Scene for GameScene {
                                 let x_dist = up_finger.pos.x as i32 - down_finger.pos.x as i32;
                                 let y_dist = up_finger.pos.y as i32 - down_finger.pos.y as i32;
                                 let dist = (x_dist.pow(2) as f32 + y_dist.pow(2) as f32).sqrt();
-                                if dist < 15.0 {
+                                if dist < 20.0 {
                                     // Short tap recognized
 
                                     if self.play_pause_button_hitbox.is_some() && Canvas::is_hitting(up_finger.pos, self.play_pause_button_hitbox.unwrap()) {
