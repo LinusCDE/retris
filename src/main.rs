@@ -3,7 +3,7 @@ extern crate downcast_rs;
 
 mod canvas;
 mod scene;
-
+mod swipe;
 
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
 use tetris_core::Size;

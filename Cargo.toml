@@ -11,3 +11,4 @@ rand = "0.7.3"
 libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", branch = "feature/multitouch-rewrite" }
 tetris_core = "0.2.0"
 downcast-rs = "1.2.0"
+fxhash = "0.2.1"
