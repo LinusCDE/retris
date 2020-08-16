@@ -1,28 +1,31 @@
 use crate::canvas::*;
 use super::Scene;
 use {rand, rand::Rng};
-use libremarkable::input::{gpio, wacom, multitouch, ev, InputDevice, InputEvent};
+use libremarkable::input::{gpio, multitouch, InputEvent};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
-use std::time::{SystemTime, Duration};
+use std::time::SystemTime;
 use std::collections::HashMap;
-use libremarkable::framebuffer::common;
-use libremarkable::framebuffer::refresh::PartialRefreshMode;
 use libremarkable::image::RgbImage;
 use std::cell::RefCell;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
 use libremarkable::input::multitouch::Finger;
+use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
 
 struct OpionatedRandomizer {
-    // Since the trait gives only immutable self,
-    // we cant expect to modifiy any states easily.
-    // This example is basicially a non thread-safe
-    // Mutex that enforces rusts borrow-rules
-    // dynamically at runtime.
-    block_pool: RefCell<Vec<i32>>
+    /// Since the trait gives only immutable self,
+    /// we cant expect to modifiy any states easily.
+    /// This example is basicially a non thread-safe
+    /// Mutex that enforces rusts borrow-rules
+    /// dynamically at runtime.
+    block_pool: RefCell<Vec<i32>>,
+    /// Count all times, a random value from the
+    /// block_pool was used (which should mean
+    /// a new block was generated)
+    block_id: Arc<AtomicU32>,
 }
 impl OpionatedRandomizer {
-    pub fn new() -> Self {
-        Self { block_pool: RefCell::new(vec![]) }
+    pub fn new(block_id: Arc<AtomicU32>) -> Self {
+        Self { block_pool: RefCell::new(vec![]), block_id }
     }
     fn actual_random_between(&self, first: i32, last: i32) -> i32 {
         rand::thread_rng().gen_range(first, last+1)
@@ -48,6 +51,7 @@ impl Randomizer for OpionatedRandomizer {
 
             // Take and return random element from pool
             let len = self.block_pool.borrow().len();
+            self.block_id.fetch_add(1, Ordering::Relaxed); // block_id += 1
             self.block_pool.borrow_mut().remove(self.actual_random_between(0, len as i32 - 1) as usize)
         }else {
             // Fallback
@@ -85,6 +89,7 @@ pub struct GameScene {
     right_button_hitbox: Option<mxcfb_rect>,
     is_paused: bool,
     pub back_button_pressed: bool,
+    block_id: Arc<AtomicU32>,
 }
 
 
@@ -124,9 +129,9 @@ impl GameScene {
         textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), t); // T-Block
         textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), s); // S-Block
 
-
+        let block_id = Arc::new(AtomicU32::new(0)); // Share as attr and in randomizer
         Self {
-            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new())),
+            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new(block_id.clone()))),
             last_draw: None,
             game_size,
             block_size: block_size as usize,
@@ -141,6 +146,7 @@ impl GameScene {
             right_button_hitbox: None,
             is_paused: false,
             back_button_pressed: false,
+            block_id,
         }
     }
 
@@ -315,13 +321,13 @@ impl Scene for GameScene {
                 }
 
                 // Movement (swipes)
-                const swipes: [Swipe; 3] = [
+                const SWIPES: [Swipe; 3] = [
                     Swipe { direction: Direction::Down, trigger: Trigger::Completed },
-                    Swipe { direction: Direction::Left, trigger: Trigger::MinDistance(1) },
-                    Swipe { direction: Direction::Right, trigger: Trigger::MinDistance(1) },
+                    Swipe { direction: Direction::Left, trigger: Trigger::MinDistance(50) },
+                    Swipe { direction: Direction::Right, trigger: Trigger::MinDistance(50) },
                 ];
 
-                if let Some(swipe) = self.swipe_tracker.detect(event, &swipes) {
+                if let Some(swipe) = self.swipe_tracker.detect(event, &SWIPES) {
                     match swipe.direction {
                         Direction::Left => self.game.perform(Action::MoveLeft),
                         Direction::Right => self.game.perform(Action::MoveRight),
@@ -332,7 +338,6 @@ impl Scene for GameScene {
                             }
                         }
                         Direction::Up => self.game.perform(Action::Rotate),
-                        
                     }
                 }
             }

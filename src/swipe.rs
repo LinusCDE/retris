@@ -2,9 +2,9 @@ use libremarkable::input::multitouch::MultitouchEvent;
 use libremarkable::cgmath::Point2;
 use fxhash::FxHashMap;
 
-pub const SWIPE_DIRECTION_CHUNK_DIST: u16 = 50; // px
+pub const SWIPE_DIRECTION_CHUNK_DIST: u16 = 25; // px
 /// Min TrackedFinger.swipe_chunk_count to cound as completed swipe
-pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 1;
+pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 2;
 /// The higher this value, the stricter the direction of the 
 /// gesture has to be.
 /// Is calculated on a per GESTURE_DIRECTION_CHUNK_DIST basis
@@ -14,6 +14,10 @@ pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 1;
 /// NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST if using a compass
 /// as analogy for the angles.
 pub const SWIPE_DIRECTION_MIN_RATIO: f32 = 1.5;
+
+/// Allow a new gesture to register, even if the current
+/// swipe was messed up.
+pub const SWIPE_ALLOW_MULTIPLE_SWIPES_AT_ONCE: bool = true;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Trigger {
@@ -67,7 +71,7 @@ impl TrackedFinger {
         if self.highest_orthogonal_dist() < SWIPE_DIRECTION_CHUNK_DIST {
             return;
         }
-        if self.invalidated {
+        if self.invalidated && !SWIPE_ALLOW_MULTIPLE_SWIPES_AT_ONCE {
             // The direction changed. This gesture should not
             // be recognized as anything valid anymore.
             // It should not contain any direction.
@@ -128,10 +132,10 @@ impl SwipeTracker {
 
     pub fn detect<'a>(&mut self, event: MultitouchEvent, conditions: &'a[Swipe]) -> Option<&'a Swipe> {
         match event {
-            MultitouchEvent::Press { finger, .. } => {
+            MultitouchEvent::Press { finger } => {
                 self.trackings.insert(finger.tracking_id, TrackedFinger::new(finger.pos));
             },
-            MultitouchEvent::Move { finger, .. } => {
+            MultitouchEvent::Move { finger } => {
                 let mut potential_swipe: Option<&'a Swipe> = None;
                 self.trackings.entry(finger.tracking_id).and_modify(|tracked_finger|
                     tracked_finger.update(finger.pos)
@@ -156,7 +160,7 @@ impl SwipeTracker {
                     return potential_swipe;
                 }
             },
-            MultitouchEvent::Release { finger, .. } => {
+            MultitouchEvent::Release { finger } => {
                 if let Some(tracked_finger) = self.trackings.remove(&finger.tracking_id) {
                     if tracked_finger.swipe_chunk_count >= SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT {
                         if let Some(completed_direction) = tracked_finger.direction {
