@@ -8,6 +8,6 @@ edition = "2018"
 
 [dependencies]
 rand = "0.7.3"
-libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", rev = "254d008" }
+libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", branch = "feature/multitouch-rewrite" }
 tetris_core = "0.2.0"
 downcast-rs = "1.2.0"

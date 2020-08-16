@@ -68,7 +68,8 @@ impl Scene for MainMenuScene {
 
     fn on_input(&mut self, event: InputEvent) {
         if let InputEvent::MultitouchEvent { event } = event {
-            if let MultitouchEvent::Touch { position, .. } = event {
+            if let MultitouchEvent::Press { finger, .. } = event {
+                let position = finger.pos;
                 if self.play_button_hitbox.is_some() && is_hitting(position, self.play_button_hitbox.unwrap()) {
                     self.play_button_pressed = true;
                 }

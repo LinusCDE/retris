@@ -252,6 +252,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
 
 [[package]]
+name = "fxhash"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -388,7 +397,7 @@ checksum = "a2f02823cf78b754822df5f7f268fb59822e7296276d3e069d8e8cb26a14bd10"
 [[package]]
 name = "libremarkable"
 version = "0.4.1"
-source = "git+https://github.com/LinusCDE/libremarkable.git?rev=254d008#254d0083a0d30e86ac9c3bd6c2bbfaf0c0587b40"
+source = "git+https://github.com/LinusCDE/libremarkable.git?branch=feature/multitouch-rewrite#fb554f8bf837a560864bccba383ff8379523818e"
 dependencies = [
  "aabb-quadtree",
  "atomic",
@@ -396,6 +405,7 @@ dependencies = [
  "env_logger",
  "epoll",
  "evdev",
+ "fxhash",
  "hlua",
  "image",
  "ioctl-gen",
