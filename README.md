@@ -15,7 +15,7 @@ The patterns are some totally random functions. If someone wants to do something
 
 ### Prebuilt binary/program
 
-- Go the the [releases page](github.com/LinusCDE/retris/releases)
+- Go the the [releases page](https://github.com/LinusCDE/retris/releases)
 - Get the newest releases "retris" file and copy it onto your remarkable, using e.g. FileZilla, WinSCP or scp.
 - SSH into your remarkable and mark the file as executable with `chmod +x retris`
 - Stop xochitl (the interface) with `systemctl stop xochitl`
