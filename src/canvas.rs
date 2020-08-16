@@ -25,10 +25,9 @@ pub struct Canvas<'a> {
 
 impl<'a> Canvas<'a> {
     pub fn new() -> Self {
-        let mut instance = Self {
+        Self {
             framebuffer: Box::new(Framebuffer::new("/dev/fb0")),
-        };
-        instance
+        }
     }
 
     pub fn framebuffer_mut(&mut self) -> &'static mut Framebuffer<'static> {
@@ -60,18 +59,9 @@ impl<'a> Canvas<'a> {
             waveform_mode::WAVEFORM_MODE_GLR16,
             display_temp::TEMP_USE_REMARKABLE_DRAW,
             dither_mode::EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-            0,
+            0, // See documentation on DRAWING_QUANT_BITS in libremarkable/framebuffer/common.rs
             false
         );
-        /*self.fb.deref_mut().partial_refresh(
-            region,
-            PartialRefreshMode::Async,
-            waveform_mode::WAVEFORM_MODE_DU,
-            display_temp::TEMP_USE_REMARKABLE_DRAW,
-            dither_mode::EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
-            DRAWING_QUANT_BIT,
-            false
-        );*/
     }
 
     pub fn draw_text(&mut self, pos: Point2<Option<i32>>, text: &str, size: f32) -> mxcfb_rect {

@@ -5,7 +5,6 @@ use libremarkable::image::RgbImage;
 use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
 use std::time::SystemTime;
 use {rand, rand::Rng};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
@@ -17,14 +16,10 @@ struct OpionatedRandomizer {
     /// Mutex that enforces rusts borrow-rules
     /// dynamically at runtime.
     block_pool: RefCell<Vec<i32>>,
-    /// Count all times, a random value from the
-    /// block_pool was used (which should mean
-    /// a new block was generated)
-    block_id: Arc<AtomicU32>,
 }
 impl OpionatedRandomizer {
-    pub fn new(block_id: Arc<AtomicU32>) -> Self {
-        Self { block_pool: RefCell::new(vec![]), block_id }
+    pub fn new() -> Self {
+        Self { block_pool: RefCell::new(vec![]) }
     }
     fn actual_random_between(&self, first: i32, last: i32) -> i32 {
         rand::thread_rng().gen_range(first, last+1)
@@ -50,7 +45,6 @@ impl Randomizer for OpionatedRandomizer {
 
             // Take and return random element from pool
             let len = self.block_pool.borrow().len();
-            self.block_id.fetch_add(1, Ordering::Relaxed); // block_id += 1
             self.block_pool.borrow_mut().remove(self.actual_random_between(0, len as i32 - 1) as usize)
         }else {
             // Fallback
@@ -88,7 +82,6 @@ pub struct GameScene {
     right_button_hitbox: Option<mxcfb_rect>,
     is_paused: bool,
     pub back_button_pressed: bool,
-    block_id: Arc<AtomicU32>,
 }
 
 
@@ -99,25 +92,25 @@ impl GameScene {
         let mut textures: HashMap<StupidColor, RgbImage> = HashMap::new();
         let black = libremarkable::image::Rgb([0, 0, 0]);
         let white = libremarkable::image::Rgb([255, 255, 255]);
-        let i: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let i: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
             if x * y % 5 == 0 { black } else { white }
         });
-        let j: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let j: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
             if x % 5 == 0 { black } else { if y % 2 == 0 { black } else { white } }
         });
-        let l: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let l: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y| {
             if y % 5 == 0 { black } else { white }
         });
-        let o: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let o: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
             if y * x % 10 > 3 { black } else { white }
         });
-        let z: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let z: RgbImage = RgbImage::from_fn(block_size, block_size, |_, y| {
             if y % 5 == 0 { black } else { white }
         });
-        let t: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let t: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
             if y * x * 3 % 10 == 0 { black } else { white }
         });
-        let s: RgbImage = RgbImage::from_fn(block_size, block_size, |x,y| {
+        let s: RgbImage = RgbImage::from_fn(block_size, block_size, |x, y| {
             if x * y % 5 != 0 { black } else { white }
         });
         textures.insert(StupidColor::from(108.0 / 255.0, 237.0 / 255.0, 238.0 / 255.0), i); // I-Block
@@ -128,9 +121,8 @@ impl GameScene {
         textures.insert(StupidColor::from(146.0 / 255.0, 45.0 / 255.0, 231.0 / 255.0), t); // T-Block
         textures.insert(StupidColor::from(221.0 / 255.0, 47.0 / 255.0, 23.0 / 255.0), s); // S-Block
 
-        let block_id = Arc::new(AtomicU32::new(0)); // Share as attr and in randomizer
         Self {
-            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new(block_id.clone()))),
+            game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new())),
             last_draw: None,
             game_size,
             block_size: block_size as usize,
@@ -145,7 +137,6 @@ impl GameScene {
             right_button_hitbox: None,
             is_paused: false,
             back_button_pressed: false,
-            block_id,
         }
     }
 
@@ -254,7 +245,7 @@ impl GameScene {
         canvas.update_partial(&mxcfb_rect::from(Point2 { x: pos.x as u32, y: pos.y as u32 }, size));
 
         const FONT_SIZE: u32 = 40;
-        let affected_rect = canvas.draw_text(
+        canvas.draw_text(
             Point2 {
                 x: Some((field_start.x + 10) as i32),
                 y: Some((field_start.y + field_size.y + FONT_SIZE + 5) as i32)
