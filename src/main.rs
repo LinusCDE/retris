@@ -51,8 +51,12 @@ fn update(scene: Box<dyn Scene>, canvas: &mut Canvas) -> Box<dyn Scene> {
             return Box::new(MainMenuScene::new(None));
         }
     }else if let Some(main_menu_scene) = scene.downcast_ref::<MainMenuScene>() {
-        if main_menu_scene.play_button_pressed {
-            return Box::new(GameScene::new(Size { width: 10, height: 22 }));
+        if main_menu_scene.play_easy_button_pressed {
+            return Box::new(GameScene::new(Size { width: 10, height: 22 }, 0.5));
+        }else if main_menu_scene.play_normal_button_pressed {
+            return Box::new(GameScene::new(Size { width: 10, height: 22 }, 1.0));
+        }else if main_menu_scene.play_hard_button_pressed {
+            return Box::new(GameScene::new(Size { width: 10, height: 22 }, 1.5));
         }else if main_menu_scene.exit_button_pressed {
             canvas.clear();
             canvas.update_full();

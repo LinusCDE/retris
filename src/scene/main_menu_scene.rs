@@ -5,8 +5,12 @@ use libremarkable::input::{InputEvent, multitouch::MultitouchEvent};
 pub struct MainMenuScene {
     drawn: bool,
     
-    play_button_hitbox: Option<mxcfb_rect>,
-    pub play_button_pressed: bool,
+    play_easy_button_hitbox: Option<mxcfb_rect>,
+    pub play_easy_button_pressed: bool,
+    play_normal_button_hitbox: Option<mxcfb_rect>,
+    pub play_normal_button_pressed: bool,
+    play_hard_button_hitbox: Option<mxcfb_rect>,
+    pub play_hard_button_pressed: bool,
 
     exit_button_hitbox: Option<mxcfb_rect>,
     pub exit_button_pressed: bool,
@@ -18,8 +22,12 @@ impl MainMenuScene {
     pub fn new(score: Option<u64>) -> Self {
         Self {
             drawn: false,
-            play_button_hitbox: None,
-            play_button_pressed: false,
+            play_easy_button_hitbox: None,
+            play_easy_button_pressed: false,
+            play_normal_button_hitbox: None,
+            play_normal_button_pressed: false,
+            play_hard_button_hitbox: None,
+            play_hard_button_pressed: false,
             exit_button_hitbox: None,
             exit_button_pressed: false,
             score,
@@ -42,8 +50,16 @@ impl Scene for MainMenuScene {
                canvas.draw_text(Point2 { x: None, y: Some(775)}, &format!("Score: {}", score), 75.0);
         }
         
-        self.play_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1100) }, "PLAY", 125.0, 25, 50));
-        self.exit_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1300) }, "EXIT", 125.0, 25, 50));
+        self.play_easy_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1000) }, "Easy", 125.0, 25, 50));
+        self.play_normal_button_hitbox = Some(canvas.draw_button(Point2 {
+            x: None,
+            y: Some(150 + self.play_easy_button_hitbox.unwrap().top as i32 + self.play_easy_button_hitbox.unwrap().height as i32)
+        }, "Normal", 125.0, 25, 50));
+        self.play_hard_button_hitbox = Some(canvas.draw_button(Point2 {
+            x: None,
+            y: Some(150 + self.play_normal_button_hitbox.unwrap().top as i32 + self.play_normal_button_hitbox.unwrap().height as i32)
+        }, "Hard", 125.0, 25, 50));
+        self.exit_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1650) }, "EXIT", 125.0, 25, 50));
         
         canvas.update_full();
     }
@@ -52,8 +68,14 @@ impl Scene for MainMenuScene {
         if let InputEvent::MultitouchEvent { event } = event {
             if let MultitouchEvent::Press { finger, .. } = event {
                 let position = finger.pos;
-                if self.play_button_hitbox.is_some() && Canvas::is_hitting(position, self.play_button_hitbox.unwrap()) {
-                    self.play_button_pressed = true;
+                if self.play_easy_button_hitbox.is_some() && Canvas::is_hitting(position, self.play_easy_button_hitbox.unwrap()) {
+                    self.play_easy_button_pressed = true;
+                }
+                if self.play_normal_button_hitbox.is_some() && Canvas::is_hitting(position, self.play_normal_button_hitbox.unwrap()) {
+                    self.play_normal_button_pressed = true;
+                }
+                if self.play_hard_button_hitbox.is_some() && Canvas::is_hitting(position, self.play_hard_button_hitbox.unwrap()) {
+                    self.play_hard_button_pressed = true;
                 }
                 if self.exit_button_hitbox.is_some() && Canvas::is_hitting(position, self.exit_button_hitbox.unwrap()) {
                     self.exit_button_pressed = true;

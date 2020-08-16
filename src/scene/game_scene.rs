@@ -74,6 +74,7 @@ impl StupidColor {
 
 pub struct GameScene {
     game: Game,
+    speed: f64,
     last_draw: Option<SystemTime>,
     game_size: Size,
     block_size: usize,
@@ -94,7 +95,7 @@ pub struct GameScene {
 
 
 impl GameScene {
-    pub fn new(game_size: Size) -> Self {
+    pub fn new(game_size: Size, speed: f64) -> Self {
         // Generate textures
         let block_size = 50;
         let mut textures: HashMap<StupidColor, RgbImage> = HashMap::new();
@@ -132,6 +133,7 @@ impl GameScene {
         let block_id = Arc::new(AtomicU32::new(0));
         Self {
             game: Game::new(&Size { width: 10, height: 22 }, Box::new(OpionatedRandomizer::new(block_id.clone()))),
+            speed,
             last_draw: None,
             game_size,
             block_size: block_size as usize,
@@ -359,7 +361,7 @@ impl Scene for GameScene {
         if let Some(last_draw) = self.last_draw {
             // Advance physics
             if ! self.is_paused {
-                self.game.update(last_draw.elapsed().unwrap().as_secs_f64());
+                self.game.update(last_draw.elapsed().unwrap().as_secs_f64() * self.speed);
             }
         }else {
             // First frame
