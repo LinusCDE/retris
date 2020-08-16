@@ -9,6 +9,8 @@ use libremarkable::framebuffer::common;
 use libremarkable::framebuffer::refresh::PartialRefreshMode;
 use libremarkable::image::RgbImage;
 use std::cell::RefCell;
+use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
+use libremarkable::input::multitouch::Finger;
 
 struct OpionatedRandomizer {
     // Since the trait gives only immutable self,
@@ -75,6 +77,8 @@ pub struct GameScene {
     last_blocks: HashMap<Point2<u8>, Block>,
     last_score: u64,
     textures: HashMap<StupidColor, RgbImage>,
+    swipe_tracker: SwipeTracker,
+    last_pressed_finger: Option<(Finger, SystemTime)>,
 }
 
 
@@ -123,6 +127,8 @@ impl GameScene {
             last_blocks: HashMap::new(),
             last_score: 0,
             textures,
+            swipe_tracker: SwipeTracker::new(),
+            last_pressed_finger: None,
         }
     }
 
@@ -256,6 +262,52 @@ impl Scene for GameScene {
                     }
                 }
             },
+            InputEvent::MultitouchEvent { event } => {
+
+                // Taps and buttons
+                match event {
+                    multitouch::MultitouchEvent::Press { finger } => {
+                        self.last_pressed_finger = Some((finger, SystemTime::now()));
+                    },
+                    multitouch::MultitouchEvent::Release { finger: up_finger } => {
+                        if let Some((down_finger, down_when)) = self.last_pressed_finger {
+                            if down_finger.tracking_id == up_finger.tracking_id
+                               && down_when.elapsed().unwrap().as_millis() < 300 {
+                                let x_dist = up_finger.pos.x as i32 - down_finger.pos.x as i32;
+                                let y_dist = up_finger.pos.y as i32 - down_finger.pos.y as i32;
+                                let dist = (x_dist.pow(2) as f32 + y_dist.pow(2) as f32).sqrt();
+                                if dist < 10.0 {
+                                    // Short tap recognized
+                                    self.game.perform(Action::Rotate);
+                                }
+                            }
+                        }
+                    },
+                    _ => { }
+                }
+
+                // Movement (swipes)
+                const swipes: [Swipe; 3] = [
+                    Swipe { direction: Direction::Down, trigger: Trigger::Completed },
+                    Swipe { direction: Direction::Left, trigger: Trigger::MinDistance(1) },
+                    Swipe { direction: Direction::Right, trigger: Trigger::MinDistance(1) },
+                ];
+
+                if let Some(swipe) = self.swipe_tracker.detect(event, &swipes) {
+                    match swipe.direction {
+                        Direction::Left => self.game.perform(Action::MoveLeft),
+                        Direction::Right => self.game.perform(Action::MoveRight),
+                        Direction::Down => {
+                            // Push all the way down
+                            for _ in 0..self.game_size.height {
+                                self.game.perform(Action::MoveDown);
+                            }
+                        }
+                        Direction::Up => self.game.perform(Action::Rotate),
+                        
+                    }
+                }
+            }
             _ => { }
         };
     }

@@ -397,7 +397,7 @@ checksum = "a2f02823cf78b754822df5f7f268fb59822e7296276d3e069d8e8cb26a14bd10"
 [[package]]
 name = "libremarkable"
 version = "0.4.1"
-source = "git+https://github.com/LinusCDE/libremarkable.git?branch=feature/multitouch-rewrite#fb554f8bf837a560864bccba383ff8379523818e"
+source = "git+https://github.com/LinusCDE/libremarkable.git?branch=feature/multitouch-rewrite#d34694ec5641a88fa046916ba9d03825653d9f97"
 dependencies = [
  "aabb-quadtree",
  "atomic",

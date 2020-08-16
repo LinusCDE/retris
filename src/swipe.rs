@@ -4,7 +4,7 @@ use fxhash::FxHashMap;
 
 pub const SWIPE_DIRECTION_CHUNK_DIST: u16 = 50; // px
 /// Min TrackedFinger.swipe_chunk_count to cound as completed swipe
-pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 150 / SWIPE_DIRECTION_CHUNK_DIST;
+pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 1;
 /// The higher this value, the stricter the direction of the 
 /// gesture has to be.
 /// Is calculated on a per GESTURE_DIRECTION_CHUNK_DIST basis
@@ -13,7 +13,7 @@ pub const SWIPE_DIRECTION_COMPLETED_MIN_CHUNK_COUNT: u16 = 150 / SWIPE_DIRECTION
 /// The value 2.0 basically allows for NORTH, EAST, WEST, SOUTH but not
 /// NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST if using a compass
 /// as analogy for the angles.
-pub const SWIPE_DIRECTION_MIN_RATIO: f32 = 2.0;
+pub const SWIPE_DIRECTION_MIN_RATIO: f32 = 1.5;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Trigger {
@@ -126,7 +126,7 @@ impl SwipeTracker {
         Self { trackings: Default::default() }
     }
 
-    pub fn detect<'a>(&mut self, event: MultitouchEvent, conditions: &'a Vec<Swipe>) -> Option<&'a Swipe> {
+    pub fn detect<'a>(&mut self, event: MultitouchEvent, conditions: &'a[Swipe]) -> Option<&'a Swipe> {
         match event {
             MultitouchEvent::Press { finger, .. } => {
                 self.trackings.insert(finger.tracking_id, TrackedFinger::new(finger.pos));
