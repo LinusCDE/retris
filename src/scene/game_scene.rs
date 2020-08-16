@@ -79,6 +79,12 @@ pub struct GameScene {
     textures: HashMap<StupidColor, RgbImage>,
     swipe_tracker: SwipeTracker,
     last_pressed_finger: Option<(Finger, SystemTime)>,
+    play_pause_button_hitbox: Option<mxcfb_rect>,
+    back_button_hitbox: Option<mxcfb_rect>,
+    left_button_hitbox: Option<mxcfb_rect>,
+    right_button_hitbox: Option<mxcfb_rect>,
+    is_paused: bool,
+    pub back_button_pressed: bool,
 }
 
 
@@ -129,6 +135,12 @@ impl GameScene {
             textures,
             swipe_tracker: SwipeTracker::new(),
             last_pressed_finger: None,
+            play_pause_button_hitbox: None,
+            back_button_hitbox: None,
+            left_button_hitbox: None,
+            right_button_hitbox: None,
+            is_paused: false,
+            back_button_pressed: false,
         }
     }
 
@@ -276,9 +288,25 @@ impl Scene for GameScene {
                                 let x_dist = up_finger.pos.x as i32 - down_finger.pos.x as i32;
                                 let y_dist = up_finger.pos.y as i32 - down_finger.pos.y as i32;
                                 let dist = (x_dist.pow(2) as f32 + y_dist.pow(2) as f32).sqrt();
-                                if dist < 10.0 {
+                                if dist < 15.0 {
                                     // Short tap recognized
-                                    self.game.perform(Action::Rotate);
+
+                                    if self.play_pause_button_hitbox.is_some() && Canvas::is_hitting(up_finger.pos, self.play_pause_button_hitbox.unwrap()) {
+                                        // Button: Pause
+                                        self.is_paused = ! self.is_paused;
+                                    } else if self.back_button_hitbox.is_some() && Canvas::is_hitting(up_finger.pos, self.back_button_hitbox.unwrap()) {
+                                        // Button: Main Menu
+                                        self.back_button_pressed = true;
+                                    } else if self.left_button_hitbox.is_some() && Canvas::is_hitting(up_finger.pos, self.left_button_hitbox.unwrap()) {
+                                        // Button: «
+                                        self.game.perform(Action::MoveLeft);
+                                    } else if self.right_button_hitbox.is_some() && Canvas::is_hitting(up_finger.pos, self.right_button_hitbox.unwrap()) {
+                                        // Button: »
+                                        self.game.perform(Action::MoveRight);
+                                    }else {
+                                        // Somewhere else
+                                        self.game.perform(Action::Rotate);
+                                    }
                                 }
                             }
                         }
@@ -315,7 +343,9 @@ impl Scene for GameScene {
     fn draw(&mut self, canvas: &mut Canvas) {
         if let Some(last_draw) = self.last_draw {
             // Advance physics
-            self.game.update(last_draw.elapsed().unwrap().as_secs_f64());
+            if ! self.is_paused {
+                self.game.update(last_draw.elapsed().unwrap().as_secs_f64());
+            }
         }else {
             // First frame
             canvas.clear();
@@ -324,6 +354,24 @@ impl Scene for GameScene {
             let point = Point2 { x: self.field_start_i32().x - 2, y: self.field_start_i32().y - 2 };
             let vec = Vector2 { x: 2 + self.field_size().x + 2, y: 2 + self.field_size().y + 2 };
             canvas.framebuffer_mut().draw_rect(point, vec, 1, color::BLACK);
+
+            self.play_pause_button_hitbox = Some(canvas.draw_button(Point2 { x: Some(50), y: Some(75) }, "Pause", 50.0, 10, 20));
+            self.back_button_hitbox = Some(canvas.draw_button(Point2 {
+                x: Some(self.play_pause_button_hitbox.unwrap().left as i32 + self.play_pause_button_hitbox.unwrap().width as i32 + 50),
+                y: Some(75)
+            }, "Main Menu", 50.0, 10, 20));
+
+            let lr_y_pos = 1780;
+            let lr_x_margin = 75;
+            let lr_vgap = 50;
+            let lr_hgap = 50;
+            let lr_font_size = 100.0;
+            self.left_button_hitbox = Some(canvas.draw_button(Point2 { x: Some(lr_x_margin), y: Some(lr_y_pos) }, "«", lr_font_size, lr_vgap, lr_hgap));
+            self.right_button_hitbox = Some(canvas.draw_button(Point2 {
+                x: Some(DISPLAYWIDTH as i32 + lr_hgap as i32 - (self.left_button_hitbox.unwrap().left as i32 + self.left_button_hitbox.unwrap().width as i32)),
+                y: Some(lr_y_pos)
+            }, "»", lr_font_size, lr_vgap, lr_hgap));
+
             canvas.update_full();
             self.draw_score(canvas);
         }

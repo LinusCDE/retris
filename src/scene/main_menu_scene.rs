@@ -25,24 +25,6 @@ impl MainMenuScene {
             score,
         }
     }
-
-
-    fn draw_button(&mut self, canvas: &mut Canvas, pos: Point2<Option<i32>>, text: &str) -> mxcfb_rect {
-        let font_size = 125.0;
-        let vgap = 25 as u32;
-        let hgap = 50 as u32;
-        let text_rect = canvas.draw_text(pos, text, font_size);
-        canvas.draw_rect(
-            Point2 { x: Some((text_rect.left - hgap) as i32), y: Some((text_rect.top - vgap) as i32) }, 
-            Vector2 { x: hgap + text_rect.width + hgap, y: vgap + text_rect.height + vgap },
-            5
-        )
-    }
-}
-
-fn is_hitting(pos: Point2<u16>, hitbox: mxcfb_rect) -> bool {
-    (pos.x as u32) >= hitbox.left && (pos.x as u32) < (hitbox.left + hitbox.width) &&
-    (pos.y as u32) >= hitbox.top && (pos.y as u32) < (hitbox.top + hitbox.height)
 }
 
 impl Scene for MainMenuScene {
@@ -60,8 +42,8 @@ impl Scene for MainMenuScene {
                canvas.draw_text(Point2 { x: None, y: Some(775)}, &format!("Score: {}", score), 75.0);
         }
         
-        self.play_button_hitbox = Some(self.draw_button(canvas, Point2 { x: None, y: Some(1100) }, "PLAY"));
-        self.exit_button_hitbox = Some(self.draw_button(canvas, Point2 { x: None, y: Some(1300) }, "EXIT"));
+        self.play_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1100) }, "PLAY", 125.0, 25, 50));
+        self.exit_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1300) }, "EXIT", 125.0, 25, 50));
         
         canvas.update_full();
     }
@@ -70,10 +52,10 @@ impl Scene for MainMenuScene {
         if let InputEvent::MultitouchEvent { event } = event {
             if let MultitouchEvent::Press { finger, .. } = event {
                 let position = finger.pos;
-                if self.play_button_hitbox.is_some() && is_hitting(position, self.play_button_hitbox.unwrap()) {
+                if self.play_button_hitbox.is_some() && Canvas::is_hitting(position, self.play_button_hitbox.unwrap()) {
                     self.play_button_pressed = true;
                 }
-                if self.exit_button_hitbox.is_some() && is_hitting(position, self.exit_button_hitbox.unwrap()) {
+                if self.exit_button_hitbox.is_some() && Canvas::is_hitting(position, self.exit_button_hitbox.unwrap()) {
                     self.exit_button_pressed = true;
                 }
             }

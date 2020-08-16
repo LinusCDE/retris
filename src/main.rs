@@ -47,7 +47,9 @@ fn main() {
 fn update(scene: Box<dyn Scene>, canvas: &mut Canvas) -> Box<dyn Scene> {
     if let Some(game_scene) = scene.downcast_ref::<GameScene>() {
         if game_scene.is_game_over() {
-            return Box::new(MainMenuScene::new(Some(game_scene.get_score())))
+            return Box::new(MainMenuScene::new(Some(game_scene.get_score())));
+        }else if game_scene.back_button_pressed {
+            return Box::new(MainMenuScene::new(None));
         }
     }else if let Some(main_menu_scene) = scene.downcast_ref::<MainMenuScene>() {
         if main_menu_scene.play_button_pressed {

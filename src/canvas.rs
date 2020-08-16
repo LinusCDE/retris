@@ -121,4 +121,19 @@ impl<'a> Canvas<'a> {
             height: size.y
         }
     }
+
+    pub fn draw_button(&mut self, pos: Point2<Option<i32>>, text: &str, font_size: f32, vgap: u32, hgap: u32) -> mxcfb_rect {
+        let text_rect = self.draw_text(pos, text, font_size);
+        self.draw_rect(
+            Point2 { x: Some((text_rect.left - hgap) as i32), y: Some((text_rect.top - vgap) as i32) }, 
+            Vector2 { x: hgap + text_rect.width + hgap, y: vgap + text_rect.height + vgap },
+            5
+        )
+    }
+
+    pub fn is_hitting(pos: Point2<u16>, hitbox: mxcfb_rect) -> bool {
+        (pos.x as u32) >= hitbox.left && (pos.x as u32) < (hitbox.left + hitbox.width) &&
+        (pos.y as u32) >= hitbox.top && (pos.y as u32) < (hitbox.top + hitbox.height)
+    }
+
 }
