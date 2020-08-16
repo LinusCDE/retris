@@ -15,6 +15,11 @@ The patterns are some totally random functions. If someone wants to do something
 
 ### Compiling
 
+- Make sure to have rustup and a current toolchain (nightly might be needed)
+- Install the [oecore toolchain](https://remarkable.engineering/).
+  - If you're not using linux, you might want to adjust the path in `.config/cargo`
+- Compile it with `cargo build --release`. It should automatically cross-compile.
+
 ### Prebuilt binary/program
 
 - Go the the [releases page](github.com/LinusCDE/retris/releases)
@@ -23,9 +28,4 @@ The patterns are some totally random functions. If someone wants to do something
 - Stop xochitl (the interface) with `systemctl stop xochitl`
 - Start the game with `./retris`
 - After you're done, restart xochitl with `systemctl start xochitl`
-
-- Make sure to have rustup and a current toolchain (nightly might be needed)
-- Install the [oecore toolchain](https://remarkable.engineering/).
-  - If you're not using linux, you might want to adjust the path in `.config/cargo`
-- Compile it with `cargo build --release`. It should automatically cross-compile.
 
