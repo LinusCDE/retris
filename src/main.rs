@@ -5,13 +5,12 @@ mod canvas;
 mod scene;
 mod swipe;
 
+use crate::canvas::Canvas;
+use crate::scene::*;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
-use tetris_core::Size;
 use std::time::{SystemTime, Duration};
 use std::thread::sleep;
-
-use scene::*;
-use canvas::Canvas;
+use tetris_core::Size;
 
 
 fn main() {

@@ -15,10 +15,7 @@ use libremarkable::framebuffer::{
     common::waveform_mode,
     common::display_temp,
     common::dither_mode,
-    refresh::PartialRefreshMode,
-    common::DRAWING_QUANT_BIT,
-    common::DRAWING_QUANT_BIT_2,
-    common::DRAWING_QUANT_BIT_3,
+    refresh::PartialRefreshMode
 };
 use std::ops::DerefMut;
 

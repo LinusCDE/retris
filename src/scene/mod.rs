@@ -1,14 +1,14 @@
-mod game_scene;
 mod blank_scene;
+mod game_scene;
 mod main_menu_scene;
 
-pub use game_scene::GameScene;
 pub use blank_scene::BlankScene;
+pub use game_scene::GameScene;
 pub use main_menu_scene::MainMenuScene;
 
 use crate::canvas::Canvas;
-use libremarkable::input::InputEvent;
 use downcast_rs::Downcast;
+use libremarkable::input::InputEvent;
 
 pub trait Scene: Downcast {
     fn on_input(&mut self, event: InputEvent) { }

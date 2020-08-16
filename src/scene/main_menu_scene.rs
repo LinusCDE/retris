@@ -1,5 +1,5 @@
-use crate::canvas::*;
 use super::Scene;
+use crate::canvas::*;
 use libremarkable::input::{InputEvent, multitouch::MultitouchEvent};
 
 pub struct MainMenuScene {

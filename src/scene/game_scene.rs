@@ -1,17 +1,14 @@
-use crate::canvas::*;
 use super::Scene;
-use {rand, rand::Rng};
-use libremarkable::input::{gpio, wacom, multitouch, ev, InputDevice, InputEvent};
-use tetris_core::{Randomizer, Game, Size, Block, Action};
-use std::time::{SystemTime, Duration};
-use std::collections::HashMap;
-use libremarkable::framebuffer::common;
-use libremarkable::framebuffer::refresh::PartialRefreshMode;
-use libremarkable::image::RgbImage;
-use std::cell::RefCell;
+use crate::canvas::*;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
-use libremarkable::input::multitouch::Finger;
+use libremarkable::image::RgbImage;
+use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
+use std::time::SystemTime;
+use {rand, rand::Rng};
+use tetris_core::{Randomizer, Game, Size, Block, Action};
 
 struct OpionatedRandomizer {
     /// Since the trait gives only immutable self,

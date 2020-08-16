@@ -1,5 +1,5 @@
-use crate::canvas::Canvas;
 use super::Scene;
+use crate::canvas::Canvas;
 
 pub struct BlankScene {
     blanked_out: bool
