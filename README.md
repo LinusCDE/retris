@@ -26,5 +26,5 @@ The patterns are some totally random functions. If someone wants to do something
 
 - Make sure to have rustup and a current toolchain (nightly might be needed)
 - Install the [oecore toolchain](https://remarkable.engineering/).
-  - If you're not using linux, you might want to adjust the path in `.config/cargo`
+  - If you're not using linux, you might want to adjust the path in `.cargo/config`
 - Compile it with `cargo build --release`. It should automatically cross-compile.
