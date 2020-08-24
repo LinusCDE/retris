@@ -15,11 +15,16 @@ pub struct MainMenuScene {
     exit_button_hitbox: Option<mxcfb_rect>,
     pub exit_button_pressed: bool,
 
+    exit_xochitl_button_hitbox: Option<mxcfb_rect>,
+    pub exit_xochitl_button_pressed: bool,
+
     score: Option<u64>,
+
+    only_exit_to_xochitl: bool,
 }
 
 impl MainMenuScene {
-    pub fn new(score: Option<u64>) -> Self {
+    pub fn new(score: Option<u64>, only_exit_to_xochitl: bool) -> Self {
         Self {
             drawn: false,
             play_easy_button_hitbox: None,
@@ -30,7 +35,10 @@ impl MainMenuScene {
             play_hard_button_pressed: false,
             exit_button_hitbox: None,
             exit_button_pressed: false,
+            exit_xochitl_button_hitbox: None,
+            exit_xochitl_button_pressed: false,
             score,
+            only_exit_to_xochitl,
         }
     }
 }
@@ -59,7 +67,12 @@ impl Scene for MainMenuScene {
             x: None,
             y: Some(150 + self.play_normal_button_hitbox.unwrap().top as i32 + self.play_normal_button_hitbox.unwrap().height as i32)
         }, "Hard", 125.0, 25, 50));
-        self.exit_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1650) }, "EXIT", 125.0, 25, 50));
+        
+        if self.only_exit_to_xochitl { 
+            self.exit_xochitl_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1650) }, "Exit to Xochitl", 125.0, 25, 50));
+        }else {
+            self.exit_button_hitbox = Some(canvas.draw_button(Point2 { x: None, y: Some(1650) }, "Exit", 125.0, 25, 50));
+        }
         
         canvas.update_full();
     }
@@ -79,6 +92,9 @@ impl Scene for MainMenuScene {
                 }
                 if self.exit_button_hitbox.is_some() && Canvas::is_hitting(position, self.exit_button_hitbox.unwrap()) {
                     self.exit_button_pressed = true;
+                }
+                if self.exit_xochitl_button_hitbox.is_some() && Canvas::is_hitting(position, self.exit_xochitl_button_hitbox.unwrap()) {
+                    self.exit_xochitl_button_pressed = true;
                 }
             }
         }
