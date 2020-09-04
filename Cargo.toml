@@ -1,6 +1,6 @@
 [package]
 name = "retris"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["Linus <linus@cosmos-ink.net>"]
 edition = "2018"
 
