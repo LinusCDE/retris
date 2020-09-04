@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:export-ydpi="254"
+   inkscape:export-xdpi="254"
+   inkscape:export-filename="/home/linus/Projekte/Rust-Lang/retris/icon.png"
+   sodipodi:docname="icon.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 100 100"
+   height="100mm"
+   width="100mm">
+  <defs
+     id="defs2">
+    <rect
+       id="rect866"
+       height="79.21624"
+       width="75.24749"
+       y="22.489583"
+       x="7.8316683" />
+    <rect
+       id="rect860"
+       height="57.467499"
+       width="47.095833"
+       y="35.930417"
+       x="13.758333" />
+    <rect
+       id="rect835"
+       height="72.601669"
+       width="57.890834"
+       y="17.250833"
+       x="0.74083414" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:window-maximized="1"
+     inkscape:window-y="0"
+     inkscape:window-x="78"
+     inkscape:window-height="1055"
+     inkscape:window-width="1842"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="225.30851"
+     inkscape:cx="182.14245"
+     inkscape:zoom="1.4142136"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
+    <text
+       style="fill:black;stroke:none;stroke-opacity:1;stroke-width:0.26458333px;stroke-linejoin:miter;stroke-linecap:butt;fill-opacity:1;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:10.58333333px;line-height:125%;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect835);"
+       id="text833"
+       xml:space="preserve" />
+    <text
+       transform="matrix(1.787722,0,0,1.7877152,-12.593128,-31.39693)"
+       style="font-style:normal;font-weight:normal;font-size:52.9167px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect866);fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       id="text864"
+       xml:space="preserve"><tspan
+         x="7.8320312"
+         y="69.30911"><tspan
+           style="font-size:52.9167px">r</tspan></tspan></text>
+    <g
+       transform="matrix(1,0,0,0.99999617,4.4364832e-7,2.5000383)"
+       id="g1000">
+      <rect
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke"
+         id="rect872"
+         width="18.947367"
+         height="18.947367"
+         x="50.526314"
+         y="71.578941" />
+      <rect
+         y="51.052628"
+         x="50.526314"
+         height="18.947367"
+         width="18.947367"
+         id="rect872-3"
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke" />
+      <rect
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke"
+         id="rect872-3-5"
+         width="18.947367"
+         height="18.947367"
+         x="50.526314"
+         y="30.526318" />
+      <rect
+         y="10"
+         x="50.526314"
+         height="18.947367"
+         width="18.947367"
+         id="rect872-3-5-6"
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke" />
+      <rect
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke"
+         id="rect872-3-5-6-2"
+         width="18.947367"
+         height="18.947367"
+         x="30"
+         y="10" />
+      <rect
+         y="10"
+         x="71.052628"
+         height="18.947367"
+         width="18.947367"
+         id="rect872-3-5-6-2-9"
+         style="fill:#000000;stroke:none;stroke-width:9.47366;stroke-linecap:round;stroke-linejoin:bevel;paint-order:fill markers stroke"
+         inkscape:transform-center-x="46.254742"
+         inkscape:transform-center-y="-4.4115775" />
+    </g>
+  </g>
+</svg>

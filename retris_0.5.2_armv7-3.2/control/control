@@ -1,0 +1,6 @@
+Package: retris
+Version: 0.5.2
+Section: games
+Maintainer: Linus K. <linus@cosmos-ink.net>
+Architecture: armv7-3.2
+Description: Implementation of rust tetris_core on the reMarkable using libremarkable
