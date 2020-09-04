@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = "0.7.3"
+rand = "0.7"
 libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", branch = "feature/multitouch-rewrite" }
-tetris_core = "0.2.0"
-downcast-rs = "1.2.0"
-fxhash = "0.2.1"
+tetris_core = "0.2"
+downcast-rs = "1.2"
+fxhash = "0.2"
