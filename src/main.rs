@@ -1,3 +1,5 @@
+/// Test ABC
+
 #[macro_use]
 extern crate downcast_rs;
 
@@ -5,6 +7,7 @@ mod canvas;
 mod scene;
 mod swipe;
 
+use clap::{Clap, crate_version, crate_authors};
 use crate::canvas::Canvas;
 use crate::scene::*;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
@@ -14,8 +17,19 @@ use std::thread::sleep;
 use tetris_core::Size;
 
 
+#[derive(Clap)]
+#[clap(version = crate_version!(), author = crate_authors!())]
+struct Opts {
+    #[clap(long, short)]
+    spare_xochitl: bool
+}
+
 fn main() {
-    let only_exit_to_xochitl = if let Ok(status) = Command::new("pidof").arg("xochitl").status() {
+    let opts: Opts = Opts::parse();
+
+    let only_exit_to_xochitl = if opts.spare_xochitl {
+        false
+    }else if let Ok(status) = Command::new("pidof").arg("xochitl").status() {
         if status.code().unwrap() == 0 {
             Command::new("systemctl").arg("stop").arg("xochitl").status().ok();
             println!("Xochitl was found and killed. You may only exit by starting Xochitl again.");

@@ -12,3 +12,4 @@ libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", branch 
 tetris_core = "0.2"
 downcast-rs = "1.2"
 fxhash = "0.2"
+clap = "3.0.0-beta.1"
