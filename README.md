@@ -1,6 +1,6 @@
-<img src="icon.png" width="25%">
-
 # retris
+
+<img src="icon.png" width="25%">
 
 Implementation of rust tetris_core on the reMarkable using libremarkable
 
