@@ -1,5 +1,3 @@
-/// Test ABC
-
 #[macro_use]
 extern crate downcast_rs;
 
@@ -10,24 +8,29 @@ mod swipe;
 use clap::{Clap, crate_version, crate_authors};
 use crate::canvas::Canvas;
 use crate::scene::*;
+use lazy_static::lazy_static;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
 use std::process::Command;
 use std::time::{SystemTime, Duration};
 use std::thread::sleep;
 use tetris_core::Size;
 
-
 #[derive(Clap)]
 #[clap(version = crate_version!(), author = crate_authors!())]
-struct Opts {
-    #[clap(long, short)]
-    spare_xochitl: bool
+pub struct Opts {
+    #[clap(long, short, about = "Don't stop xochitl service when a xochitl process is found.")]
+    spare_xochitl: bool,
+
+    #[clap(long, short = "A", about = "Don't display the left and right software arrow buttons.")]
+    no_arrow_buttons: bool,
+}
+
+lazy_static! {
+    pub static ref CLI_OPTS: Opts = Opts::parse();
 }
 
 fn main() {
-    let opts: Opts = Opts::parse();
-
-    let only_exit_to_xochitl = if opts.spare_xochitl {
+    let only_exit_to_xochitl = if CLI_OPTS.spare_xochitl {
         false
     }else if let Ok(status) = Command::new("pidof").arg("xochitl").status() {
         if status.code().unwrap() == 0 {

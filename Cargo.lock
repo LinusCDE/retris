@@ -1005,11 +1005,12 @@ dependencies = [
 
 [[package]]
 name = "retris"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "clap",
  "downcast-rs",
  "fxhash",
+ "lazy_static",
  "libremarkable",
  "rand 0.7.3",
  "tetris_core",

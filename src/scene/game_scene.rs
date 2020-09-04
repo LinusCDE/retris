@@ -383,11 +383,13 @@ impl Scene for GameScene {
             let lr_vgap = 50;
             let lr_hgap = 50;
             let lr_font_size = 100.0;
-            self.left_button_hitbox = Some(canvas.draw_button(Point2 { x: Some(lr_x_margin), y: Some(lr_y_pos) }, "«", lr_font_size, lr_vgap, lr_hgap));
-            self.right_button_hitbox = Some(canvas.draw_button(Point2 {
-                x: Some(DISPLAYWIDTH as i32 + lr_hgap as i32 - (self.left_button_hitbox.unwrap().left as i32 + self.left_button_hitbox.unwrap().width as i32)),
-                y: Some(lr_y_pos)
-            }, "»", lr_font_size, lr_vgap, lr_hgap));
+            if ! crate::CLI_OPTS.no_arrow_buttons {
+                self.left_button_hitbox = Some(canvas.draw_button(Point2 { x: Some(lr_x_margin), y: Some(lr_y_pos) }, "«", lr_font_size, lr_vgap, lr_hgap));
+                self.right_button_hitbox = Some(canvas.draw_button(Point2 {
+                    x: Some(DISPLAYWIDTH as i32 + lr_hgap as i32 - (self.left_button_hitbox.unwrap().left as i32 + self.left_button_hitbox.unwrap().width as i32)),
+                    y: Some(lr_y_pos)
+                }, "»", lr_font_size, lr_vgap, lr_hgap));
+            }
 
             canvas.update_full();
             self.draw_score(canvas);
