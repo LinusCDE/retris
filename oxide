@@ -1,0 +1,5 @@
+name=retris
+desc=Tetris
+call=/opt/bin/retris
+term=:
+imgFile=:
