@@ -1,4 +1,4 @@
-name=retris
+name=reTris
 desc=Tetris
 call=/opt/bin/retris --spare-xochitl
 term=:
