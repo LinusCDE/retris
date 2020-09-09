@@ -361,7 +361,9 @@ impl Scene for GameScene {
         if let Some(last_draw) = self.last_draw {
             // Advance physics
             if ! self.is_paused {
-                self.game.update(last_draw.elapsed().unwrap().as_secs_f64() * self.speed);
+                if let Ok(elapsed) = last_draw.elapsed() { // May fail due to clock drift (see docs of elapsed())
+                    self.game.update(elapsed.as_secs_f64() * self.speed);
+                }
             }
         }else {
             // First frame
