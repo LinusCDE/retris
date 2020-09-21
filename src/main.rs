@@ -21,7 +21,7 @@ pub struct Opts {
     #[clap(long, short, about = "Don't stop xochitl service when a xochitl process is found.")]
     spare_xochitl: bool,
 
-    #[clap(long, short = "A", about = "Don't display the left and right software arrow buttons.")]
+    #[clap(long, short = 'A', about = "Don't display the left and right software arrow buttons.")]
     no_arrow_buttons: bool,
 }
 
