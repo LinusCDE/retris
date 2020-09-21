@@ -1,6 +1,6 @@
 [package]
 name = "retris"
-version = "0.5.5"
+version = "0.5.6"
 authors = ["Linus <linus@cosmos-ink.net>"]
 edition = "2018"
 
@@ -8,9 +8,13 @@ edition = "2018"
 
 [dependencies]
 rand = "0.7"
-libremarkable = { git = "https://github.com/LinusCDE/libremarkable.git", branch = "feature/multitouch-rewrite" }
 tetris_core = "0.2"
 downcast-rs = "1.2"
 fxhash = "0.2"
 clap = "3.0.0-beta.1"
 lazy_static = "1.4.0"
+
+[dependencies.libremarkable]
+#path = "../libremarkable"
+git = "https://github.com/LinusCDE/libremarkable.git"
+branch = "feature/fix-evdev-crash-in-remux"

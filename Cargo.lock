@@ -35,9 +35,12 @@ dependencies = [
 
 [[package]]
 name = "atomic"
-version = "0.4.6"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64f46ca51dca4837f1520754d1c8c36636356b81553d928dc9c177025369a06e"
+checksum = "c3410529e8288c463bedb5930f82833bc0c90e5d2fe639a56582a4d09220b281"
+dependencies = [
+ "autocfg 1.0.0",
+]
 
 [[package]]
 name = "atty"
@@ -457,7 +460,7 @@ checksum = "a2f02823cf78b754822df5f7f268fb59822e7296276d3e069d8e8cb26a14bd10"
 [[package]]
 name = "libremarkable"
 version = "0.4.1"
-source = "git+https://github.com/LinusCDE/libremarkable.git?branch=feature/multitouch-rewrite#440a914e900efb1d4c4804e592ed54728fffe545"
+source = "git+https://github.com/LinusCDE/libremarkable.git?branch=feature/fix-evdev-crash-in-remux#696e64eaa7ab5f57865c9bc0232e59c8696dfdee"
 dependencies = [
  "aabb-quadtree",
  "atomic",
@@ -1005,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "retris"
-version = "0.5.5"
+version = "0.5.6"
 dependencies = [
  "clap",
  "downcast-rs",
