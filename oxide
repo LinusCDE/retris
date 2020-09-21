@@ -1,5 +1,4 @@
 name=reTris
 desc=Tetris
-call=/opt/bin/retris --spare-xochitl
-term=:
+call=/opt/bin/retris
 imgFile=retris

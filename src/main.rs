@@ -18,8 +18,8 @@ use tetris_core::Size;
 #[derive(Clap)]
 #[clap(version = crate_version!(), author = crate_authors!())]
 pub struct Opts {
-    #[clap(long, short, about = "Don't stop xochitl service when a xochitl process is found.")]
-    spare_xochitl: bool,
+    #[clap(long, short = 'X', about = "Stop xochitl service when a xochitl process is found. Useful when running without any launcher.")]
+    kill_xochitl: bool,
 
     #[clap(long, short = 'A', about = "Don't display the left and right software arrow buttons.")]
     no_arrow_buttons: bool,
@@ -30,7 +30,7 @@ lazy_static! {
 }
 
 fn main() {
-    let only_exit_to_xochitl = if CLI_OPTS.spare_xochitl {
+    let only_exit_to_xochitl = if ! CLI_OPTS.kill_xochitl {
         false
     }else if let Ok(status) = Command::new("pidof").arg("xochitl").status() {
         if status.code().unwrap() == 0 {
