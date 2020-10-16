@@ -1,7 +1,7 @@
 # retris
 
 [![rm1](https://img.shields.io/badge/rM1-supported-green)](https://remarkable.com/store/remarkable)
-[![rm2](https://img.shields.io/badge/rM2-unknown-yellow)](https://remarkable.com/store/remarkable-2)
+[![rm2](https://img.shields.io/badge/rM2-unsupported-red)](https://remarkable.com/store/remarkable-2)
 [![opkg](https://img.shields.io/badge/OPKG-retris-blue)](https://github.com/toltec-dev/toltec)
 [![launchers](https://img.shields.io/badge/Launchers-supported-green)](https://github.com/reHackable/awesome-reMarkable#launchers)
 [![Mentioned in Awesome reMarkable](https://awesome.re/mentioned-badge.svg)](https://github.com/reHackable/awesome-reMarkable)
@@ -37,3 +37,7 @@ The patterns are some totally random functions. If someone wants to do something
 - Install the [oecore toolchain](https://remarkable.engineering/).
   - If you're not using linux, you might want to adjust the path in `.cargo/config`
 - Compile it with `cargo build --release`. It should automatically cross-compile.
+
+## reMarkable 2 support
+
+As of now, the new framebuffer is not yet figured out. As soon as that happens and libremarkable gets updated, I can fix this sw to work on the rM 2.
