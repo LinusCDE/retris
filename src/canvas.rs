@@ -26,7 +26,7 @@ pub struct Canvas<'a> {
 impl<'a> Canvas<'a> {
     pub fn new() -> Self {
         Self {
-            framebuffer: Box::new(Framebuffer::new("/dev/fb0")),
+            framebuffer: Box::new(Framebuffer::from_path("/dev/fb0")),
         }
     }
 
@@ -51,7 +51,7 @@ impl<'a> Canvas<'a> {
             true
         );
     }
-    
+
     pub fn update_partial(&mut self, region: &mxcfb_rect) {
         self.framebuffer_mut().partial_refresh(
             region,

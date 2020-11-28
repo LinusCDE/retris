@@ -16,5 +16,5 @@ lazy_static = "1.4.0"
 
 [dependencies.libremarkable]
 #path = "../libremarkable"
-git = "https://github.com/LinusCDE/libremarkable.git"
-branch = "feature/fix-evdev-crash-in-remux"
+git = "https://github.com/canselcik/libremarkable.git"
+rev = "3aeaa21d42f1760672c00a2cad0c876b77b302c0"
