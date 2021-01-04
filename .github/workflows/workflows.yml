@@ -15,13 +15,14 @@ jobs:
       - name: Build with toltec toolchain
         run: |
           build_script='
-            cd /build
+            # Fall back to system-wide config
+            rm .cargo/config
+
             cargo build --release
             arm-linux-gnueabihf-strip target/armv7-unknown-linux-gnueabihf/release/retris
           '
-          docker run -i --rm -v "$(pwd)":"/build" \
-            ghcr.io/toltec-dev/rust:v1.2.1 \
-            sh -c "$build_script"
+          docker run -i --rm -v "$(pwd)":"/build" -w /build \
+            ghcr.io/toltec-dev/rust:v1.2.1 sh -c "$build_script"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
