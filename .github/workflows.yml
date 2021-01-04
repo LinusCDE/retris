@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build with toltec toolchain
+        run: |
+          build_script='
+            cd /build
+            cargo build --release
+            arm-linux-gnueabihf-strip target/armv7-unknown-linux-gnueabihf/release/retris
+          '
+          docker run -i --rm -v "$(pwd)":"/build" \
+            ghcr.io/toltec-dev/rust:v1.2.1 \
+            sh -c "$build_script"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: retris
+          path: target/armv7-unknown-linux-gnueabihf/release/retris
