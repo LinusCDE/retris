@@ -191,13 +191,13 @@ impl GameScene {
         self.game.get_score()
     }
 
-    fn draw_blocks(&mut self, canvas: &mut Canvas) -> bool {
+    fn draw_blocks(&mut self, canvas: &mut Canvas) -> Vec<mxcfb_rect> {
         let mut blocks: HashMap<Point2<u8>, Block> = HashMap::new();
         for block in self.game.draw() {
             blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 }, block);
         }
 
-        let mut any_change = false;
+        let mut changed_rects: Vec<mxcfb_rect> = vec![];
 
         for y in 0..self.game_size().height {
             for x in 0..self.game_size().width {
@@ -206,8 +206,6 @@ impl GameScene {
                 let is_filled = blocks.contains_key(&pos);
 
                 if was_filled != is_filled {
-                    any_change = true;
-
                     // Change detected
                     let block_start = self.to_coords((x, y));
                     let block_size = self.to_size((1,1));
@@ -232,13 +230,22 @@ impl GameScene {
                             color::WHITE
                         );
                     }
+
+                    changed_rects.push(
+                        mxcfb_rect {
+                            left: block_start.0 as u32,
+                            top: block_start.1 as u32,
+                            width: block_size.0 as u32,
+                            height: block_size.1 as u32,
+                        }
+                    );
                 }
             }
         }
 
         self.last_blocks = blocks;
 
-        any_change
+        changed_rects
     }
 
     fn draw_score(&mut self, canvas: &mut Canvas) {
@@ -405,12 +412,15 @@ impl Scene for GameScene {
             self.draw_score(canvas);
             any_change = true;
         }
-        
-        any_change |= self.draw_blocks(canvas);
+
+        //any_change |= self.draw_blocks(canvas);
+        let specific_changes = self.draw_blocks(canvas);
 
         if any_change {
-            // If any change => A2 refresh the display
+            // If any change => DU refresh the display
             canvas.update_partial(&mxcfb_rect { left: 0, top: 0, width: DISPLAYWIDTH as u32, height: DISPLAYHEIGHT as u32 });
+        }else {
+            specific_changes.iter().for_each(|rect| canvas.update_partial(rect));
         }
     }
 }
