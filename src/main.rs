@@ -10,6 +10,7 @@ use crate::canvas::Canvas;
 use crate::scene::*;
 use lazy_static::lazy_static;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
+use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::process::Command;
 use std::time::{SystemTime, Duration};
 use std::thread::sleep;
@@ -39,6 +40,15 @@ fn main() {
             true
         }else { false }
     } else { false };
+
+    if CURRENT_DEVICE.model == Model::Gen2 && std::env::var_os("LD_PRELOAD").is_none() {
+        println!("WARN: You executed retris on a reMarkable 2 without having LD_PRELOAD set.");
+        println!("      This suggests that you didn't use/enable rm2fb. Without rm2fb you");
+        println!("      won't see anything on the display!");
+        println!("      ");
+        println!("      See https://github.com/ddvk/remarkable2-framebuffer/ on how to solve");
+        println!("      this. Launchers (installed through toltec) should automatically do this.");
+    }
 
     let mut canvas = Canvas::new();
 
