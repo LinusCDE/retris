@@ -1,7 +1,7 @@
 # retris
 
 [![rm1](https://img.shields.io/badge/rM1-supported-green)](https://remarkable.com/store/remarkable)
-[![rm2](https://img.shields.io/badge/rM2-only_with_shim-orange)](https://remarkable.com/store/remarkable-2)
+[![rm2](https://img.shields.io/badge/rM2-supported-green)](https://remarkable.com/store/remarkable-2)
 [![opkg](https://img.shields.io/badge/OPKG-retris-blue)](https://github.com/toltec-dev/toltec)
 [![launchers](https://img.shields.io/badge/Launchers-supported-green)](https://github.com/reHackable/awesome-reMarkable#launchers)
 [![Mentioned in Awesome reMarkable](https://awesome.re/mentioned-badge.svg)](https://github.com/reHackable/awesome-reMarkable)
@@ -40,4 +40,6 @@ The patterns are some totally random functions. If someone wants to do something
 
 ## reMarkable 2 support
 
-The inputs are fully working on the reMarkable 2. The framebuffer is still a work in progress, however it can be run by using [this shim](https://github.com/ddvk/remarkable2-framebuffer#framebuffer-client-shim). The game may be a bit less performant with it as not all refresh modes are figured out, but it'll work.
+This app cant actually drive the rM 2 framebuffer. It needs [rm2fb](https://github.com/ddvk/remarkable2-framebuffer/) for that.
+
+If you execute retris from ssh, be sure to have followed rm2fb steps to enable the support. When launching through a launcher (from toltec) it should just work but have more ghosting on the rM2.
