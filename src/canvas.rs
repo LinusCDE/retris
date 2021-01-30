@@ -56,6 +56,18 @@ impl<'a> Canvas<'a> {
         self.framebuffer_mut().partial_refresh(
             region,
             PartialRefreshMode::Async,
+            waveform_mode::WAVEFORM_MODE_GLR16,
+            display_temp::TEMP_USE_REMARKABLE_DRAW,
+            dither_mode::EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
+            0, // See documentation on DRAWING_QUANT_BITS in libremarkable/framebuffer/common.rs
+            false
+        );
+    }
+
+    pub fn update_partial_mono(&mut self, region: &mxcfb_rect) {
+        self.framebuffer_mut().partial_refresh(
+            region,
+            PartialRefreshMode::Async,
             waveform_mode::WAVEFORM_MODE_DU,
             display_temp::TEMP_USE_REMARKABLE_DRAW,
             dither_mode::EPDC_FLAG_USE_DITHERING_PASSTHROUGH,
@@ -69,7 +81,7 @@ impl<'a> Canvas<'a> {
         if pos.x.is_none() || pos.y.is_none() {
             // Do dryrun to get text size
             let rect = self.framebuffer_mut().draw_text(Point2 { x: 0.0, y: DISPLAYHEIGHT as f32 }, text.to_owned(), size, color::BLACK, true);
-        
+
             if pos.x.is_none() {
                 // Center horizontally
                 pos.x = Some(DISPLAYWIDTH as i32 / 2 - rect.width as i32 / 2);

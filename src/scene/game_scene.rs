@@ -191,13 +191,15 @@ impl GameScene {
         self.game.get_score()
     }
 
-    fn draw_blocks(&mut self, canvas: &mut Canvas) -> Vec<mxcfb_rect> {
+    /// Draws all blocks and returns a list of all rects that were changed
+    /// and whether they are now filled or not.
+    fn draw_blocks(&mut self, canvas: &mut Canvas) -> Vec<(mxcfb_rect, bool)> {
         let mut blocks: HashMap<Point2<u8>, Block> = HashMap::new();
         for block in self.game.draw() {
             blocks.insert(Point2 { x: block.rect.origin.x as u8, y: block.rect.origin.y as u8 }, block);
         }
 
-        let mut changed_rects: Vec<mxcfb_rect> = vec![];
+        let mut changed_rects: Vec<(mxcfb_rect, bool)> = vec![];
 
         for y in 0..self.game_size().height {
             for x in 0..self.game_size().width {
@@ -231,14 +233,15 @@ impl GameScene {
                         );
                     }
 
-                    changed_rects.push(
+                    changed_rects.push((
                         mxcfb_rect {
                             left: block_start.0 as u32,
                             top: block_start.1 as u32,
                             width: block_size.0 as u32,
                             height: block_size.1 as u32,
-                        }
-                    );
+                        },
+                        is_filled
+                    ));
                 }
             }
         }
@@ -248,7 +251,7 @@ impl GameScene {
         changed_rects
     }
 
-    fn draw_score(&mut self, canvas: &mut Canvas) {
+    fn draw_score(&mut self, canvas: &mut Canvas) -> mxcfb_rect {
         let field_start = self.field_start_u32();
         let field_size = self.field_size();
 
@@ -272,7 +275,7 @@ impl GameScene {
             },
             &format!("Score: {}", self.get_score()),
             FONT_SIZE as f32,
-        );
+        )
     }
 }
 
@@ -405,22 +408,32 @@ impl Scene for GameScene {
         }
         self.last_draw = Some(SystemTime::now());
 
-        let mut any_change = false;
         // Update score if changed
         if self.last_score != self.get_score() {
             self.last_score = self.get_score();
-            self.draw_score(canvas);
-            any_change = true;
+            let rect = self.draw_score(canvas);
+            canvas.update_partial(&rect);
         }
 
-        //any_change |= self.draw_blocks(canvas);
-        let specific_changes = self.draw_blocks(canvas);
+        let block_changes = self.draw_blocks(canvas);
+        if block_changes.len() > 0 {
+            // Not sure if doing seperate transitions is a good or bad thing on either
+            // rM1 or rM2. On the rM1 it seems to reduce some artifacts.
+            //
+            // Waiting for refreshes on the rM2 is currently stubbed by rm2fb. On the rM1
+            // it takes about 350ms for each, making the game lag when waiting.
 
-        if any_change {
-            // If any change => DU refresh the display
-            canvas.update_partial(&mxcfb_rect { left: 0, top: 0, width: DISPLAYWIDTH as u32, height: DISPLAYHEIGHT as u32 });
-        }else {
-            specific_changes.iter().for_each(|rect| canvas.update_partial(rect));
+            // Do all white -> black transitions first (they are faster)
+            block_changes
+                .iter()
+                .filter(|(_, filled)| *filled)
+                .for_each(|(rect, _)| canvas.update_partial_mono(rect));
+
+            // Do all black -> white transitions (they take longer anyway)
+            block_changes
+                .iter()
+                .filter(|(_, filled)| !*filled)
+                .for_each(|(rect, _)| canvas.update_partial_mono(rect));
         }
     }
 }
