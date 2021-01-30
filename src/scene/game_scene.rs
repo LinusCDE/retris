@@ -4,6 +4,7 @@ use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
 use fxhash::FxHashMap;
 use libremarkable::image::RgbImage;
 use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
+use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::SystemTime;
@@ -423,17 +424,35 @@ impl Scene for GameScene {
             // Waiting for refreshes on the rM2 is currently stubbed by rm2fb. On the rM1
             // it takes about 350ms for each, making the game lag when waiting.
 
-            // Do all white -> black transitions first (they are faster)
-            block_changes
-                .iter()
-                .filter(|(_, filled)| *filled)
-                .for_each(|(rect, _)| canvas.update_partial_mono(rect));
+            match CURRENT_DEVICE.model {
+                Model::Gen1 => {
+                    // Do all white -> black transitions first (they are faster)
+                    block_changes
+                        .iter()
+                        .filter(|(_, filled)| *filled)
+                        .for_each(|(rect, _)| canvas.update_partial(rect));
 
-            // Do all black -> white transitions (they take longer anyway)
-            block_changes
-                .iter()
-                .filter(|(_, filled)| !*filled)
-                .for_each(|(rect, _)| canvas.update_partial_mono(rect));
+                    // Do all black -> white transitions (they take longer anyway)
+                    block_changes
+                        .iter()
+                        .filter(|(_, filled)| !*filled)
+                        .for_each(|(rect, _)| canvas.update_partial(rect));
+                },
+                Model::Gen2 => {
+                    // Do all white -> black transitions first (they are faster)
+                    block_changes
+                        .iter()
+                        .filter(|(_, filled)| *filled)
+                        .for_each(|(rect, _)| canvas.update_partial_mono(rect));
+
+                    // Do all black -> white transitions (they take longer anyway)
+                    block_changes
+                        .iter()
+                        .filter(|(_, filled)| !*filled)
+                        .for_each(|(rect, _)| canvas.update_partial_mono(rect));
+                },
+                _ => unreachable!(),
+            }
         }
     }
 }
