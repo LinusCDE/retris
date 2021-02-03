@@ -12,7 +12,7 @@ use lazy_static::lazy_static;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
 use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::process::Command;
-use std::time::{SystemTime, Duration};
+use std::time::{Instant, Duration};
 use std::thread::sleep;
 use tetris_core::Size;
 
@@ -62,17 +62,16 @@ fn main() {
     let mut current_scene: Box<dyn Scene> = Box::new(MainMenuScene::new(None, only_exit_to_xochitl));
 
     loop {
-        let before_input = SystemTime::now();
+        let before_input = Instant::now();
         for event in input_rx.try_iter() {
             current_scene.on_input(event);        
         }
 
         current_scene.draw(&mut canvas);
         current_scene = update(current_scene, &mut canvas, only_exit_to_xochitl);
-        
 
         // Wait remaining frame time
-        let elapsed = before_input.elapsed().unwrap();
+        let elapsed = before_input.elapsed();
         if elapsed < FRAME_DURATION {
             sleep(FRAME_DURATION - elapsed);
         }

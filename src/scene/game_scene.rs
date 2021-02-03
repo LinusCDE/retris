@@ -7,7 +7,7 @@ use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
 use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::time::SystemTime;
+use std::time::Instant;
 use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
 use {rand, rand::Rng};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
@@ -76,14 +76,14 @@ impl StupidColor {
 pub struct GameScene {
     game: Game,
     speed: f64,
-    last_draw: Option<SystemTime>,
+    last_draw: Option<Instant>,
     game_size: Size,
     block_size: usize,
     last_blocks: HashMap<Point2<u8>, Block>,
     last_score: u64,
     textures: HashMap<StupidColor, RgbImage>,
     swipe_tracker: SwipeTracker,
-    last_pressed_finger: Option<(Finger, SystemTime)>,
+    last_pressed_finger: Option<(Finger, Instant)>,
     play_pause_button_hitbox: Option<mxcfb_rect>,
     back_button_hitbox: Option<mxcfb_rect>,
     left_button_hitbox: Option<mxcfb_rect>,
@@ -299,14 +299,14 @@ impl Scene for GameScene {
                 // Taps and buttons
                 match event {
                     multitouch::MultitouchEvent::Press { finger } => {
-                        self.last_pressed_finger = Some((finger, SystemTime::now()));
+                        self.last_pressed_finger = Some((finger, Instant::now()));
                         // This finger can only control the current block with swipes
                         self.finger_controls_which_block.insert(finger.tracking_id, self.block_id.load(Ordering::Relaxed));
                     },
                     multitouch::MultitouchEvent::Release { finger: up_finger } => {
                         if let Some((down_finger, down_when)) = self.last_pressed_finger {
                             if down_finger.tracking_id == up_finger.tracking_id
-                               && down_when.elapsed().unwrap().as_millis() < 300 {
+                               && down_when.elapsed().as_millis() < 300 {
                                 let x_dist = up_finger.pos.x as i32 - down_finger.pos.x as i32;
                                 let y_dist = up_finger.pos.y as i32 - down_finger.pos.y as i32;
                                 let dist = (x_dist.pow(2) as f32 + y_dist.pow(2) as f32).sqrt();
@@ -372,9 +372,7 @@ impl Scene for GameScene {
         if let Some(last_draw) = self.last_draw {
             // Advance physics
             if ! self.is_paused {
-                if let Ok(elapsed) = last_draw.elapsed() { // May fail due to clock drift (see docs of elapsed())
-                    self.game.update(elapsed.as_secs_f64() * self.speed);
-                }
+                self.game.update(last_draw.elapsed().as_secs_f64() * self.speed);
             }
         }else {
             // First frame
@@ -407,7 +405,7 @@ impl Scene for GameScene {
             canvas.update_full();
             self.draw_score(canvas);
         }
-        self.last_draw = Some(SystemTime::now());
+        self.last_draw = Some(Instant::now());
 
         // Update score if changed
         if self.last_score != self.get_score() {
