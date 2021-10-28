@@ -28,7 +28,7 @@ impl OpionatedRandomizer {
         Self { block_pool: RefCell::new(vec![]), block_id }
     }
     fn actual_random_between(&self, first: i32, last: i32) -> i32 {
-        rand::thread_rng().gen_range(first, last+1)
+        rand::thread_rng().gen_range(first..=last)
     }
     fn fillup(&self, sets: usize) {
         let mut block_pool = self.block_pool.borrow_mut();
@@ -449,7 +449,6 @@ impl Scene for GameScene {
                         .filter(|(_, filled)| !*filled)
                         .for_each(|(rect, _)| canvas.update_partial_mono(rect));
                 },
-                _ => unreachable!(),
             }
         }
     }

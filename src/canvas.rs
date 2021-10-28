@@ -80,7 +80,7 @@ impl<'a> Canvas<'a> {
         let mut pos = pos;
         if pos.x.is_none() || pos.y.is_none() {
             // Do dryrun to get text size
-            let rect = self.framebuffer_mut().draw_text(Point2 { x: 0.0, y: DISPLAYHEIGHT as f32 }, text.to_owned(), size, color::BLACK, true);
+            let rect = self.framebuffer_mut().draw_text(Point2 { x: 0.0, y: DISPLAYHEIGHT as f32 }, &text, size, color::BLACK, true);
 
             if pos.x.is_none() {
                 // Center horizontally
@@ -94,7 +94,7 @@ impl<'a> Canvas<'a> {
         }
         let pos = Point2 { x: pos.x.unwrap() as f32, y: pos.y.unwrap() as f32 };
 
-        self.framebuffer_mut().draw_text(pos, text.to_owned(), size, color::BLACK, false)
+        self.framebuffer_mut().draw_text(pos, &text, size, color::BLACK, false)
     }
 
     pub fn draw_rect(&mut self, pos: Point2<Option<i32>>, size: Vector2<u32>, border_px: u32,) -> mxcfb_rect {

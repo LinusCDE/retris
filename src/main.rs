@@ -5,7 +5,7 @@ mod canvas;
 mod scene;
 mod swipe;
 
-use clap::{Clap, crate_version, crate_authors};
+use clap::{Parser, crate_version, crate_authors};
 use crate::canvas::Canvas;
 use crate::scene::*;
 use lazy_static::lazy_static;
@@ -16,7 +16,7 @@ use std::time::{Instant, Duration};
 use std::thread::sleep;
 use tetris_core::Size;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(version = crate_version!(), author = crate_authors!())]
 pub struct Opts {
     #[clap(long, short = 'X', about = "Stop xochitl service when a xochitl process is found. Useful when running without any launcher.")]
