@@ -15,24 +15,24 @@ use libremarkable::framebuffer::{
     common::waveform_mode,
     common::display_temp,
     common::dither_mode,
-    refresh::PartialRefreshMode
+    PartialRefreshMode
 };
 use std::ops::DerefMut;
 
-pub struct Canvas<'a> {
-    framebuffer: Box::<Framebuffer<'a>>,
+pub struct Canvas {
+    framebuffer: Box::<Framebuffer>,
 }
 
-impl<'a> Canvas<'a> {
+impl Canvas {
     pub fn new() -> Self {
         Self {
-            framebuffer: Box::new(Framebuffer::from_path("/dev/fb0")),
+            framebuffer: Box::new(Framebuffer::default()),
         }
     }
 
-    pub fn framebuffer_mut(&mut self) -> &'static mut Framebuffer<'static> {
+    pub fn framebuffer_mut(&mut self) -> &'static mut Framebuffer {
         unsafe {
-            std::mem::transmute::<_, &'static mut Framebuffer<'static>>(
+            std::mem::transmute::<_, &'static mut Framebuffer>(
                 self.framebuffer.deref_mut(),
             )
         }

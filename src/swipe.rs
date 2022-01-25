@@ -1,5 +1,5 @@
 use fxhash::FxHashMap;
-use libremarkable::input::multitouch::MultitouchEvent;
+use libremarkable::input::MultitouchEvent;
 use libremarkable::cgmath::Point2;
 
 pub const SWIPE_DIRECTION_CHUNK_DIST: u16 = 25; // px

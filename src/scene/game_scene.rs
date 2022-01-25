@@ -3,7 +3,7 @@ use crate::canvas::*;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
 use fxhash::FxHashMap;
 use libremarkable::image::RgbImage;
-use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
+use libremarkable::input::{MultitouchEvent, GPIOEvent, Finger, InputEvent, PhysicalButton};
 use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -284,12 +284,12 @@ impl Scene for GameScene {
     fn on_input(&mut self, event: InputEvent) {
         match event {
             InputEvent::GPIO { event } => {
-                if let gpio::GPIOEvent::Press { button } = event {
+                if let GPIOEvent::Press { button } = event {
                     match button {
-                        gpio::PhysicalButton::MIDDLE => self.game.perform(Action::Rotate),
-                        gpio::PhysicalButton::LEFT => self.game.perform(Action::MoveLeft),
-                        gpio::PhysicalButton::RIGHT => self.game.perform(Action::MoveRight),
-                        gpio::PhysicalButton::POWER => self.game.perform(Action::MoveDown),
+                        PhysicalButton::MIDDLE => self.game.perform(Action::Rotate),
+                        PhysicalButton::LEFT => self.game.perform(Action::MoveLeft),
+                        PhysicalButton::RIGHT => self.game.perform(Action::MoveRight),
+                        PhysicalButton::POWER => self.game.perform(Action::MoveDown),
                         _ => { }
                     }
                 }
@@ -298,12 +298,12 @@ impl Scene for GameScene {
 
                 // Taps and buttons
                 match event {
-                    multitouch::MultitouchEvent::Press { finger } => {
+                    MultitouchEvent::Press { finger } => {
                         self.last_pressed_finger = Some((finger, Instant::now()));
                         // This finger can only control the current block with swipes
                         self.finger_controls_which_block.insert(finger.tracking_id, self.block_id.load(Ordering::Relaxed));
                     },
-                    multitouch::MultitouchEvent::Release { finger: up_finger } => {
+                    MultitouchEvent::Release { finger: up_finger } => {
                         if let Some((down_finger, down_when)) = self.last_pressed_finger {
                             if down_finger.tracking_id == up_finger.tracking_id
                                && down_when.elapsed().as_millis() < 300 {
@@ -360,7 +360,7 @@ impl Scene for GameScene {
                     }
                 }
 
-                if let multitouch::MultitouchEvent::Release { .. } = event {
+                if let MultitouchEvent::Release { .. } = event {
                     self.finger_controls_which_block.remove(&tracking_id);
                 }
             }
