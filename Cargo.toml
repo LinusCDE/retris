@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libremarkable = { git = "https://github.com/canselcik/libremarkable.git", ref = "e9ae2461" }
+libremarkable = { git = "https://github.com/canselcik/libremarkable.git", rev = "e9ae2461" }
 rand = "0.9"
 tetris_core = "0.2"
 downcast-rs = "1.2"

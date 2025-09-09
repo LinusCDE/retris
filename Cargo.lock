@@ -418,7 +418,7 @@ checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 [[package]]
 name = "libremarkable"
 version = "0.7.0"
-source = "git+https://github.com/canselcik/libremarkable.git#e9ae24611338cac6d9fba71d0ae9917d71d42970"
+source = "git+https://github.com/canselcik/libremarkable.git?rev=e9ae2461#e9ae24611338cac6d9fba71d0ae9917d71d42970"
 dependencies = [
  "aabb-quadtree",
  "cgmath",
