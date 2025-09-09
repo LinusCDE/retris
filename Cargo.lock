@@ -682,7 +682,7 @@ dependencies = [
 
 [[package]]
 name = "retris"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "clap",
  "downcast-rs",
