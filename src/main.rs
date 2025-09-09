@@ -5,30 +5,30 @@ mod canvas;
 mod scene;
 mod swipe;
 
-use clap::{Parser, crate_version, crate_authors};
+use clap::Parser;
 use crate::canvas::Canvas;
 use crate::scene::*;
-use lazy_static::lazy_static;
 use libremarkable::input::{InputDevice, InputEvent, ev::EvDevContext};
 use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::process::Command;
+use std::sync::LazyLock;
 use std::time::{Instant, Duration};
 use std::thread::sleep;
 use tetris_core::Size;
 
 #[derive(Parser)]
-#[clap(version = crate_version!(), author = crate_authors!())]
+#[clap(version, about, author)]
 pub struct Opts {
-    #[clap(long, short = 'X', about = "Stop xochitl service when a xochitl process is found. Useful when running without any launcher.")]
+    /// Stop xochitl service when a xochitl process is found. Useful when running without any launcher.
+    #[clap(long, short = 'X')]
     kill_xochitl: bool,
 
-    #[clap(long, short = 'A', about = "Don't display the left and right software arrow buttons.")]
+    /// Don't display the left and right software arrow buttons.
+    #[clap(long, short = 'A')]
     no_arrow_buttons: bool,
 }
 
-lazy_static! {
-    pub static ref CLI_OPTS: Opts = Opts::parse();
-}
+pub static CLI_OPTS: LazyLock<Opts> = LazyLock::new(|| Opts::parse());
 
 fn main() {
     let only_exit_to_xochitl = if ! CLI_OPTS.kill_xochitl {

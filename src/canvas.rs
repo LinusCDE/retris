@@ -2,40 +2,28 @@ pub use libremarkable::framebuffer::{
     common::mxcfb_rect,
     cgmath::Point2,
     cgmath::Vector2,
-    FramebufferBase,
     FramebufferDraw,
-    FramebufferIO,
     FramebufferRefresh,
     core::Framebuffer,
     common::DISPLAYWIDTH,
     common::DISPLAYHEIGHT,
     common::color,
 };
-use libremarkable::framebuffer::{
-    common::waveform_mode,
-    common::display_temp,
-    common::dither_mode,
-    refresh::PartialRefreshMode
-};
-use std::ops::DerefMut;
+use libremarkable::framebuffer::{common::waveform_mode, common::display_temp, common::dither_mode, PartialRefreshMode};
 
-pub struct Canvas<'a> {
-    framebuffer: Box::<Framebuffer<'a>>,
+pub struct Canvas {
+    framebuffer: Box<Framebuffer>,
 }
 
-impl<'a> Canvas<'a> {
+impl Canvas {
     pub fn new() -> Self {
         Self {
-            framebuffer: Box::new(Framebuffer::from_path("/dev/fb0")),
+            framebuffer: Box::new(Framebuffer::new()),
         }
     }
 
-    pub fn framebuffer_mut(&mut self) -> &'static mut Framebuffer<'static> {
-        unsafe {
-            std::mem::transmute::<_, &'static mut Framebuffer<'static>>(
-                self.framebuffer.deref_mut(),
-            )
-        }
+    pub fn framebuffer_mut(&mut self) -> &mut Framebuffer {
+        self.framebuffer.as_mut()
     }
 
     pub fn clear(&mut self) {

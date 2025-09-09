@@ -3,12 +3,12 @@ use crate::canvas::*;
 use crate::swipe::{SwipeTracker, Swipe, Trigger, Direction};
 use fxhash::FxHashMap;
 use libremarkable::image::RgbImage;
-use libremarkable::input::{gpio, multitouch, multitouch::Finger, InputEvent};
 use libremarkable::device::{CURRENT_DEVICE, Model};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::Instant;
 use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
+use libremarkable::input::{Finger, GPIOEvent, InputEvent, MultitouchEvent, PhysicalButton};
 use {rand, rand::Rng};
 use tetris_core::{Randomizer, Game, Size, Block, Action};
 
@@ -28,7 +28,7 @@ impl OpionatedRandomizer {
         Self { block_pool: RefCell::new(vec![]), block_id }
     }
     fn actual_random_between(&self, first: i32, last: i32) -> i32 {
-        rand::thread_rng().gen_range(first..=last)
+        rand::rng().random_range(first..=last)
     }
     fn fillup(&self, sets: usize) {
         let mut block_pool = self.block_pool.borrow_mut();
@@ -284,12 +284,12 @@ impl Scene for GameScene {
     fn on_input(&mut self, event: InputEvent) {
         match event {
             InputEvent::GPIO { event } => {
-                if let gpio::GPIOEvent::Press { button } = event {
+                if let GPIOEvent::Press { button } = event {
                     match button {
-                        gpio::PhysicalButton::MIDDLE => self.game.perform(Action::Rotate),
-                        gpio::PhysicalButton::LEFT => self.game.perform(Action::MoveLeft),
-                        gpio::PhysicalButton::RIGHT => self.game.perform(Action::MoveRight),
-                        gpio::PhysicalButton::POWER => self.game.perform(Action::MoveDown),
+                        PhysicalButton::MIDDLE => self.game.perform(Action::Rotate),
+                        PhysicalButton::LEFT => self.game.perform(Action::MoveLeft),
+                        PhysicalButton::RIGHT => self.game.perform(Action::MoveRight),
+                        PhysicalButton::POWER => self.game.perform(Action::MoveDown),
                         _ => { }
                     }
                 }
@@ -298,12 +298,12 @@ impl Scene for GameScene {
 
                 // Taps and buttons
                 match event {
-                    multitouch::MultitouchEvent::Press { finger } => {
+                    MultitouchEvent::Press { finger } => {
                         self.last_pressed_finger = Some((finger, Instant::now()));
                         // This finger can only control the current block with swipes
                         self.finger_controls_which_block.insert(finger.tracking_id, self.block_id.load(Ordering::Relaxed));
                     },
-                    multitouch::MultitouchEvent::Release { finger: up_finger } => {
+                    MultitouchEvent::Release { finger: up_finger } => {
                         if let Some((down_finger, down_when)) = self.last_pressed_finger {
                             if down_finger.tracking_id == up_finger.tracking_id
                                && down_when.elapsed().as_millis() < 300 {
@@ -360,7 +360,7 @@ impl Scene for GameScene {
                     }
                 }
 
-                if let multitouch::MultitouchEvent::Release { .. } = event {
+                if let MultitouchEvent::Release { .. } = event {
                     self.finger_controls_which_block.remove(&tracking_id);
                 }
             }

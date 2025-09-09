@@ -1,6 +1,6 @@
 use fxhash::FxHashMap;
-use libremarkable::input::multitouch::MultitouchEvent;
 use libremarkable::cgmath::Point2;
+use libremarkable::input::MultitouchEvent;
 
 pub const SWIPE_DIRECTION_CHUNK_DIST: u16 = 25; // px
 /// Min TrackedFinger.swipe_chunk_count to cound as completed swipe
