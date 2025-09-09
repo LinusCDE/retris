@@ -25,7 +25,7 @@ jobs:
             ghcr.io/toltec-dev/rust:v1.2.1 sh -c "$build_script"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: retris
           path: target/armv7-unknown-linux-gnueabihf/release/retris
