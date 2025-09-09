@@ -17,7 +17,7 @@ use std::thread::sleep;
 use tetris_core::Size;
 
 #[derive(Parser)]
-#[clap(version, about, author)]
+#[clap(version, author, help_template = "{before-help}{name} {version} - by {author}\n\n{all-args}{after-help}")]
 pub struct Opts {
     /// Stop xochitl service when a xochitl process is found. Useful when running without any launcher.
     #[clap(long, short = 'X')]
