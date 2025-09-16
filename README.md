@@ -46,3 +46,7 @@ This is done using the `Cross.toml` file. So you should just need to run `cross 
 This app cant actually drive the rM 2 framebuffer. It needs [rm2fb](https://github.com/ddvk/remarkable2-framebuffer/) for that.
 
 If you execute retris from ssh, be sure to have followed rm2fb steps to enable the support. When launching through a launcher (from toltec) it should just work but have more ghosting on the rM2.
+
+### Environment variables
+
+The environment variable `LIBREMARKABLE_FB_DISFAVOR_INTERNAL_RM2FB` can be set to `1` to make this application not try to use its internal framebuffer client for [RM2FB](https://github.com/ddvk/remarkable2-framebuffer/).
